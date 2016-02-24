@@ -11,7 +11,7 @@ AsciiTerminal is a extend version of the [Trystan's AsciiPanel](https://github.c
 
 Examples of use is in the [examples](https://github.com/julianmaster/AsciiTerminal/tree/master/src/examples) folder.
 
-![example image](https://github.com/julianmaster/AsciiTerminal/master/readme-media/screenshot-1.png)
+![example image](https://raw.github.com/julianmaster/AsciiTerminal/master/readme-media/screenshot-1.png)
 
 ## Tilesets
 
