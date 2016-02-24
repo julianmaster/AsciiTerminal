@@ -56,7 +56,7 @@ public class AsciiUISample {
 	}
 	
 	public static void main(String[] args) {
-		String[] choices = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]" };
+		String[] choices = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
 	    
 		String input = (String) JOptionPane.showInputDialog(null, "Choose tilset...",
 	        "Choice of tileset", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
@@ -71,8 +71,11 @@ public class AsciiUISample {
 			else if(input.equals("Vidumec [15x15]")) {
 				new AsciiUISample("src/assets/Vidumec_15x15.png", 15, 15);
 			}
-			else {
+			else if(input.equals("Wanderlust [16x16]")) {
 				new AsciiUISample("src/assets/wanderlust.png", 16, 16);
+			}
+			else {
+				new AsciiUISample("src/assets/Curses_square_24.png", 24, 24);
 			}
 		}
 	}
