@@ -16,7 +16,5 @@ Examples of use is in the [examples](https://github.com/julianmaster/AsciiTermin
 ## Tilesets
 
 All tilesets use come from :
-[Dwarf Fortress wiki](http://dwarffortresswiki.org/Tileset_repository)
-[Dwarf Fortress file depot](http://dffd.bay12games.com/category.php?id=16)
-
-
+* [Dwarf Fortress wiki](http://dwarffortresswiki.org/Tileset_repository)
+* [Dwarf Fortress file depot](http://dffd.bay12games.com/category.php?id=16)
