@@ -21,6 +21,7 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 	protected Color mouseCurrentColor;
 	protected Color mouseDefaultColor;
 	protected Color mouseEnteredColor;
+	protected Color mouseBackgroundColor;
 	
 	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseEnteredColor) {
 		this.asciiPanel = asciiPanel;
@@ -30,6 +31,19 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 		this.mouseCurrentColor = mouseDefaultColor;
 		this.mouseDefaultColor = mouseDefaultColor;
 		this.mouseEnteredColor = mouseEnteredColor;
+		setBounds(x*asciiPanel.getCharacterSize().width, y*asciiPanel.getCharacterSize().height, label.length()*asciiPanel.getCharacterSize().width, asciiPanel.getCharacterSize().height);
+		this.addMouseListener(this);
+	}
+	
+	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseEnteredColor, Color mouseBackgroundColor) {
+		this.asciiPanel = asciiPanel;
+		this.name = label;
+		this.x = x;
+		this.y = y;
+		this.mouseCurrentColor = mouseDefaultColor;
+		this.mouseDefaultColor = mouseDefaultColor;
+		this.mouseEnteredColor = mouseEnteredColor;
+		this.mouseBackgroundColor = mouseBackgroundColor;
 		setBounds(x*asciiPanel.getCharacterSize().width, y*asciiPanel.getCharacterSize().height, label.length()*asciiPanel.getCharacterSize().width, asciiPanel.getCharacterSize().height);
 		this.addMouseListener(this);
 	}
@@ -63,7 +77,7 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 	
 	@Override
 	public void paint(Graphics g) {
-		asciiPanel.writeString(x, y, name, mouseCurrentColor);
+		asciiPanel.writeString(x, y, name, mouseCurrentColor, mouseBackgroundColor != null ? mouseBackgroundColor : asciiPanel.getDefaultCharacterBackgroundColor());
 	}
 	
 	@Override

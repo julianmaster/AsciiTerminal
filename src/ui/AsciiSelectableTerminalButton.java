@@ -17,6 +17,11 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		super(asciiPanel, label, x, y, mouseDefaultColor, mouseEnteredColor);
 		this.mouseSelectColor = mouseSelectColor;
 	}
+	
+	public AsciiSelectableTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseEnteredColor, Color mouseSelectColor, Color mouseBackgroundColor) {
+		super(asciiPanel, label, x, y, mouseDefaultColor, mouseEnteredColor, mouseBackgroundColor);
+		this.mouseSelectColor = mouseSelectColor;
+	}
 
 	public void setSelect(boolean select) {
 		this.select = select;
