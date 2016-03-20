@@ -141,7 +141,7 @@ public class AsciiPanel extends JPanel {
     }
 
     public void clear(){
-        clear(0, 0, size.width-1, size.height-1);
+        clear(0, 0, size.width, size.height);
     }
 
     public void clear(int x, int y, int width, int height){
@@ -152,16 +152,16 @@ public class AsciiPanel extends JPanel {
             throw new IllegalArgumentException("Y position between [0 and "+(size.height-1)+"]");
         }
         if(width < 1){
-            throw new IllegalArgumentException("Width under 0");
+            throw new IllegalArgumentException("Width under 1");
         }
         if(height < 1){
-            throw new IllegalArgumentException("Height under 0");
+            throw new IllegalArgumentException("Height under 1");
         }
-        if(width+x > size.width-1 || height+y > size.height-1){
+        if(width+x > size.width || height+y > size.height){
             throw new IllegalArgumentException("Clear over the terminal");
         }
-        for(int i = x; i < size.height; i++){
-            for(int j = x; j < size.width; j++){
+        for(int i = y; i < y + height; i++){
+            for(int j = x; j < x + width; j++){
                 AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
                 terminal[i][j] = tdc;
                 oldTerminal[i][j] = tdc;
@@ -169,7 +169,7 @@ public class AsciiPanel extends JPanel {
         }
         if(graphics != null) {
         	graphics.setColor(defaultCharacterBackgroundColor);
-            graphics.fillRect(x * characterSize.width, y * characterSize.height, (x + width) * characterSize.width, (y + height) * characterSize.height);
+            graphics.fillRect(x * characterSize.width, y * characterSize.height, width * characterSize.width, height * characterSize.height);
         }
     }
 
