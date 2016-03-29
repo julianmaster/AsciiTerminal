@@ -175,13 +175,13 @@ public class AsciiPanel extends JPanel {
 
     @Override
     public void paint(Graphics g) {
-        if(image == null){
-            image = this.createImage(this.getWidth(), this.getHeight());
+		if(image == null) {
+			image = this.createImage(this.getPreferredSize().width, this.getPreferredSize().height);
             graphics = image.getGraphics();
             graphics.setColor(defaultCharacterBackgroundColor);
             graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
-        }
-        
+    	}
+    	
         for(Component component : getComponents()) {
         	component.paint(graphics);
         }
