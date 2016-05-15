@@ -14,10 +14,11 @@ import javax.swing.JComponent;
  *
  */
 public class AsciiTerminalButton extends JComponent implements MouseListener {
-	private final AsciiPanel asciiPanel;
+	protected final AsciiPanel asciiPanel;
 	private String name;
 	private int x;
 	private int y;
+	protected boolean entered = false;
 	protected Color mouseCurrentColor;
 	protected Color mouseDefaultColor;
 	protected Color mouseEnteredColor;
@@ -65,14 +66,16 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
+		entered = true;
 		mouseCurrentColor = mouseEnteredColor;
-		asciiPanel.repaint();
+		asciiPanel.repaint(getBounds());
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
+		entered = false;
 		mouseCurrentColor = mouseDefaultColor;
-		asciiPanel.repaint();
+		asciiPanel.repaint(getBounds());
 	}
 	
 	@Override
@@ -92,9 +95,17 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 	
 	public void setMouseDefaultColor(Color mouseDefaultColor) {
 		this.mouseDefaultColor = mouseDefaultColor;
+		if(!entered) {
+			mouseCurrentColor = mouseDefaultColor;
+			asciiPanel.repaint(getBounds());
+		}
 	}
 	
 	public void setMouseEnteredColor(Color mouseEnteredColor) {
 		this.mouseEnteredColor = mouseEnteredColor;
+		if(entered) {
+			mouseCurrentColor = mouseEnteredColor;
+			asciiPanel.repaint(getBounds());
+		}
 	}
 }

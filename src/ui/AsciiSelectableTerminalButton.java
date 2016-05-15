@@ -34,6 +34,7 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 
 	@Override
 	public void mouseExited(MouseEvent e) {
+		super.mouseExited(e);
 		changeColor();
 	}
 	
@@ -44,6 +45,6 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		else {
 			mouseCurrentColor = mouseDefaultColor;
 		}
-		this.repaint();
+		asciiPanel.repaint(getBounds());
 	}
 }
