@@ -63,19 +63,19 @@ public class AsciiUISample {
 	    
 		if(input != null) {
 			if(input.equals("Anikki [8x8]")) {
-				new AsciiUISample("src/assets/Anikki_square_8x8.png", 8, 8);
+				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8);
 			}
 			else if(input.equals("Yoshis island [9x12]")) {
-				new AsciiUISample("src/assets/Yoshis_island.png", 9, 12);
+				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12);
 			}
 			else if(input.equals("Vidumec [15x15]")) {
-				new AsciiUISample("src/assets/Vidumec_15x15.png", 15, 15);
+				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15);
 			}
 			else if(input.equals("Wanderlust [16x16]")) {
-				new AsciiUISample("src/assets/wanderlust.png", 16, 16);
+				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16);
 			}
 			else {
-				new AsciiUISample("src/assets/Curses_square_24.png", 24, 24);
+				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24);
 			}
 		}
 	}

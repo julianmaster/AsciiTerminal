@@ -10,7 +10,6 @@ import java.awt.image.FilteredImageSource;
 import java.awt.image.LookupOp;
 import java.awt.image.LookupTable;
 import java.awt.image.ShortLookupTable;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,7 +54,7 @@ public class AsciiPanel extends JPanel {
 
         try {
             character = new  BufferedImage[256];
-            BufferedImage tilesets = ImageIO.read(new File(tilesetFile));
+            BufferedImage tilesets = ImageIO.read(getClass().getResource(tilesetFile));
 
             // Recuperation of the background color
             BufferedImage imageBackgroundColor = tilesets.getSubimage(0, 0, 1, 1);
@@ -81,7 +80,7 @@ public class AsciiPanel extends JPanel {
             }
         }
         catch (IOException ex) {
-            Logger.getLogger(AsciiTerminal.class.getName()).log(Level.SEVERE, null, ex);
+        	Logger.getLogger(AsciiTerminal.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         this.setLayout(null);
