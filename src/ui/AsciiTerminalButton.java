@@ -32,7 +32,7 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 		this.mouseCurrentColor = mouseDefaultColor;
 		this.mouseDefaultColor = mouseDefaultColor;
 		this.mouseEnteredColor = mouseEnteredColor;
-		setBounds(x*asciiPanel.getCharacterSize().width, y*asciiPanel.getCharacterSize().height, label.length()*asciiPanel.getCharacterSize().width, asciiPanel.getCharacterSize().height);
+		setBounds(x*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), y*asciiPanel.getCharacterSize().height*asciiPanel.getScale(), label.length()*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), asciiPanel.getCharacterSize().height*asciiPanel.getScale());
 		this.addMouseListener(this);
 	}
 	
@@ -45,7 +45,7 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
 		this.mouseDefaultColor = mouseDefaultColor;
 		this.mouseEnteredColor = mouseEnteredColor;
 		this.mouseBackgroundColor = mouseBackgroundColor;
-		setBounds(x*asciiPanel.getCharacterSize().width, y*asciiPanel.getCharacterSize().height, label.length()*asciiPanel.getCharacterSize().width, asciiPanel.getCharacterSize().height);
+		setBounds(x*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), y*asciiPanel.getCharacterSize().height*asciiPanel.getScale(), label.length()*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), asciiPanel.getCharacterSize().height*asciiPanel.getScale());
 		this.addMouseListener(this);
 	}
 

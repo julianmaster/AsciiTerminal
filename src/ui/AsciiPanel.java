@@ -33,10 +33,16 @@ public class AsciiPanel extends JPanel {
     private AsciiTerminalDataCell[][] oldTerminal;
     private Image image;
     private Graphics graphics;
+    private int scale;
 
     public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight) {
+    	this(dimension, tilesetFile, characterWidth, characterHeight, 1);
+    }
+    
+    public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight, int scale) {
         this.size = dimension;
         this.characterSize = new Dimension(characterWidth, characterHeight);
+        this.scale = scale;
         this.defaultCharacterColor = Color.WHITE;
         this.defaultCharacterBackgroundColor = Color.BLACK;
 
@@ -50,7 +56,7 @@ public class AsciiPanel extends JPanel {
             }
         }
 
-        this.setPreferredSize(new Dimension(size.width*characterSize.width, size.height*characterSize.height));
+        this.setPreferredSize(new Dimension(size.width*characterSize.width*scale, size.height*characterSize.height*scale));
 
         try {
             character = new  BufferedImage[256];
@@ -168,7 +174,7 @@ public class AsciiPanel extends JPanel {
         }
         if(graphics != null) {
         	graphics.setColor(defaultCharacterBackgroundColor);
-            graphics.fillRect(x * characterSize.width, y * characterSize.height, width * characterSize.width, height * characterSize.height);
+            graphics.fillRect(x * characterSize.width * scale, y * characterSize.height * scale, width * characterSize.width * scale, height * characterSize.height * scale);
         }
     }
 
@@ -194,7 +200,7 @@ public class AsciiPanel extends JPanel {
                 }
 
                 LookupOp lookupOp = setColorCharacter(terminal[i][j].backgroundColor, terminal[i][j].dataColor);
-                graphics.drawImage(lookupOp.filter(character[terminal[i][j].data], null), j*characterSize.width, i*characterSize.height, this);
+                graphics.drawImage(lookupOp.filter(character[terminal[i][j].data], null), j*characterSize.width*scale, i*characterSize.height*scale, characterSize.width*scale, characterSize.height*scale, this);
 
                 oldTerminal[i][j].data = terminal[i][j].data;
                 oldTerminal[i][j].dataColor = terminal[i][j].dataColor;
@@ -292,5 +298,8 @@ public class AsciiPanel extends JPanel {
     
     public Dimension getCharacterSize() {
 		return characterSize;
+	}
+    public int getScale() {
+		return scale;
 	}
 }
