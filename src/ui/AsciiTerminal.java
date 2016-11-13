@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
@@ -83,12 +84,13 @@ public class AsciiTerminal extends JFrame {
     		asciiTitleBarPanel.add(reduceWindowButton);
     		
     		// Close window button
+    		JFrame frame = this;
     		AsciiTerminalButton closeButton = new AsciiTerminalButton(asciiTitleBarPanel, "X", dimension.width-1, 0, Color.RED, Color.RED, Color.BLUE);
     		closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
     		closeButton.addMouseListener(new MouseAdapter() {
     			@Override
     			public void mouseClicked(MouseEvent e) {
-    				System.exit(0);
+    				dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
     			}
     		});
     		asciiTitleBarPanel.add(closeButton);
