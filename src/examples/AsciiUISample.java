@@ -21,8 +21,8 @@ public class AsciiUISample {
 	
 	private final AsciiTerminal terminal;
 	
-	public AsciiUISample(String tilesetFile, int characterWidth, int characterHeight) {
-		terminal = new AsciiTerminal(TITLE, new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), tilesetFile, characterWidth, characterHeight);
+	public AsciiUISample(String tilesetFile, int characterWidth, int characterHeight, int scale, boolean customWindow) {
+		terminal = new AsciiTerminal(TITLE, new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), tilesetFile, characterWidth, characterHeight, scale, customWindow);
 		
 		AsciiPanel asciiPanel = terminal.getAsciiPanel();
 		Random rand = new Random();
@@ -63,19 +63,19 @@ public class AsciiUISample {
 	    
 		if(input != null) {
 			if(input.equals("Anikki [8x8]")) {
-				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8);
+				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8, 1 ,true);
 			}
 			else if(input.equals("Yoshis island [9x12]")) {
-				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12);
+				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12, 1 ,true);
 			}
 			else if(input.equals("Vidumec [15x15]")) {
-				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15);
+				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15, 1 ,true);
 			}
 			else if(input.equals("Wanderlust [16x16]")) {
-				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16);
+				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16, 1 ,true);
 			}
 			else {
-				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24);
+				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24, 1 ,true);
 			}
 		}
 	}

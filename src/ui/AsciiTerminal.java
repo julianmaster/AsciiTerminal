@@ -72,19 +72,21 @@ public class AsciiTerminal extends JFrame {
 			});
     		asciiTitleBarPanel.add(titleBarButton);
     		
+    		JFrame frame = this;
+    		
     		// Reduce window button
     		AsciiTerminalButton reduceWindowButton = new AsciiTerminalButton(asciiTitleBarPanel, "-", dimension.width-2, 0, Color.WHITE, Color.WHITE, Color.BLUE);
     		reduceWindowButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
     		reduceWindowButton.addMouseListener(new MouseAdapter() {
     			@Override
     			public void mouseClicked(MouseEvent e) {
+    				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_ICONIFIED));
     				setState(JFrame.ICONIFIED);
     			}
     		});
     		asciiTitleBarPanel.add(reduceWindowButton);
     		
     		// Close window button
-    		JFrame frame = this;
     		AsciiTerminalButton closeButton = new AsciiTerminalButton(asciiTitleBarPanel, "X", dimension.width-1, 0, Color.RED, Color.RED, Color.BLUE);
     		closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
     		closeButton.addMouseListener(new MouseAdapter() {
