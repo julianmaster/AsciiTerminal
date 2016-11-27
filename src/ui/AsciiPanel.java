@@ -141,8 +141,12 @@ public class AsciiPanel extends JPanel {
         }
     }
 
-    public AsciiTerminalDataCell read(int positionX, int positionY){
-        return this.oldTerminal[positionX][positionY];
+    public AsciiTerminalDataCell readCurrent(int x, int y){
+        return this.oldTerminal[y][x];
+    }
+    
+    public AsciiTerminalDataCell readNext(int x, int y){
+        return this.terminal[y][x];
     }
 
     public void clear(){
