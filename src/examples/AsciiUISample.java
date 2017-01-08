@@ -18,6 +18,7 @@ public class AsciiUISample {
 	public static final String TITLE = "ASCII Demo";
 	public static final int WINDOW_WIDTH = 16;
 	public static final int WINDOW_HEIGHT = 16;
+	public static final int SCALE = 3;
 	
 	private final AsciiTerminal terminal;
 	
@@ -63,19 +64,19 @@ public class AsciiUISample {
 	    
 		if(input != null) {
 			if(input.equals("Anikki [8x8]")) {
-				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8, 1 ,true);
+				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8, SCALE ,true);
 			}
 			else if(input.equals("Yoshis island [9x12]")) {
-				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12, 1 ,true);
+				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12, SCALE ,true);
 			}
 			else if(input.equals("Vidumec [15x15]")) {
-				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15, 1 ,true);
+				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15, SCALE ,true);
 			}
 			else if(input.equals("Wanderlust [16x16]")) {
-				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16, 1 ,true);
+				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16, SCALE ,true);
 			}
 			else {
-				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24, 1 ,true);
+				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24, SCALE ,true);
 			}
 		}
 	}
