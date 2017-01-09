@@ -3,6 +3,8 @@ package examples;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import ui.AsciiPanel;
@@ -23,9 +25,11 @@ public class AsciiTetris {
 	
 	public static final int PLAYFIELD_WIDTH = 10;
 	public static final int PLAYFIELD_HEIGHT = 22;
+	public static final int DISPLAY_PLAYFIELD_HEIGHT = 20;
 	
 	private AsciiTerminal asciiTerminal;
 	private AsciiPanel asciiPanel;
+	private KeyEvent event;
 	
 	private Random rand = new Random();
 	private int score = 0;
@@ -37,7 +41,6 @@ public class AsciiTetris {
 	private int currentDirection = 0;
 	private Tetrimino currentTetrimino = null;
 	
-	// Point[x][y]
 	enum Tetrimino {
 		I(Color.CYAN, 4, new Point[][]{
 			new Point[]{new Point(0,1), new Point(1,1), new Point(2,1), new Point(3,1)},
@@ -97,11 +100,12 @@ public class AsciiTetris {
 		asciiTerminal = new AsciiTerminal("AsciiTetris", new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), TILESET, CHARACTER_WIDTH, CHARACTER_HEIGHT, SCALE, CUSTOM_WINDOW);
 		asciiPanel = asciiTerminal.getAsciiPanel();
 		
-		for(int i = 18; i < 22; i++) {
-			for(int j = 0; j < 10; j++) {
-				cells[j][i] = Color.GREEN;
+		asciiTerminal.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				event = e;
 			}
-		}
+		});
 		
 		newTetrimino();
 	}
@@ -115,25 +119,28 @@ public class AsciiTetris {
 			lastLoopTime = now;
 			double delta = updateLength / OPTIMAL_TIME;
 			
-			// UPDATE
 			/**
 			 * UPDATE
 			 */
 			
 			timer += delta;
-			if(timer >= TARGET_FPS/4) {
+			if(timer >= TARGET_FPS/10) {
 				boolean goDown = true;
 				for(Point p : currentTetrimino.position[currentDirection]) {
-					Color color = cells[p.x+currentPosition.x+1][p.y+currentPosition.y+1];
+					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
+						goDown = false;
+						break;
+					}
+					Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y + 1];
 					if(color != null) {
 						goDown = false;
+						break;
 					}
 				}
 				
 				if(goDown) {
 					timer = 0;
 					currentPosition.y += 1;
-					System.out.println("tic");
 				}
 				else {
 					for(Point p : currentTetrimino.position[currentDirection]) {
@@ -142,6 +149,48 @@ public class AsciiTetris {
 					newTetrimino();
 				}
 			}
+			
+			if(event != null) {
+				if(event.getKeyCode() == KeyEvent.VK_LEFT) {
+					boolean goLeft = true;
+					for(Point p : currentTetrimino.position[currentDirection]) {
+						if(p.x + currentPosition.x - 1 < 0) {
+							goLeft = false;
+							break;
+						}
+						Color color = cells[p.x + currentPosition.x - 1][p.y + currentPosition.y];
+						if(color != null) {
+							goLeft = false;
+							break;
+						}
+					}
+					
+					if(goLeft) {
+						currentPosition.x -= 1;
+					}
+				}
+				if(event.getKeyCode() == KeyEvent.VK_RIGHT) {
+					boolean goRight = true;
+					for(Point p : currentTetrimino.position[currentDirection]) {
+						if(p.x + currentPosition.x + 1 >= PLAYFIELD_WIDTH) {
+							goRight = false;
+							break;
+						}
+						Color color = cells[p.x + currentPosition.x + 1][p.y + currentPosition.y];
+						if(color != null) {
+							goRight = false;
+							break;
+						}
+					}
+					
+					if(goRight) {
+						currentPosition.x += 1;
+					}
+				}
+				
+				event = null;
+			}
+
 			
 			
 			
@@ -171,10 +220,10 @@ public class AsciiTetris {
 			// PLAYFIELD
 			int xOffset = 2;
 			int yOffset = 2;
-			for(int i = 0; i < 10; i++) {
-				for(int j = 0; j < 20; j++) {
+			for(int i = 0; i < PLAYFIELD_WIDTH; i++) {
+				for(int j = PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT; j < PLAYFIELD_HEIGHT; j++) {
 					if(cells[i][j] != null) {
-						asciiPanel.write(i+xOffset, j+yOffset, ' ', Color.WHITE, cells[i][j+2]);
+						asciiPanel.write(i + xOffset, j + yOffset - (PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT), ' ', Color.WHITE, cells[i][j]);
 					}
 				}
 			}
@@ -223,9 +272,7 @@ public class AsciiTetris {
 		Tetrimino[] tetriminos = Tetrimino.values();
 		currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
 		currentDirection = 0;
-		System.out.println(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2);
 		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 0);
-		System.out.println(currentTetrimino.name());
 	}
 	
 	public static void main(String[] args) {
