@@ -36,6 +36,8 @@ public class AsciiTetris {
 	
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
+	private double FPS = 1f;
+	
 	private double timer = 0d;
 	private Point currentPosition = null;
 	private int currentDirection = 0;
@@ -124,7 +126,7 @@ public class AsciiTetris {
 			 */
 			
 			timer += delta;
-			if(timer >= TARGET_FPS/10) {
+			if(timer >= TARGET_FPS / FPS) {
 				boolean goDown = true;
 				for(Point p : currentTetrimino.position[currentDirection]) {
 					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
@@ -150,6 +152,7 @@ public class AsciiTetris {
 				}
 			}
 			
+			// KEY EVENT
 			if(event != null) {
 				if(event.getKeyCode() == KeyEvent.VK_LEFT) {
 					boolean goLeft = true;
@@ -185,6 +188,21 @@ public class AsciiTetris {
 					
 					if(goRight) {
 						currentPosition.x += 1;
+					}
+				}
+				if(event.getKeyCode() == KeyEvent.VK_UP) {
+					boolean turn = true;
+					int nextDirection = (currentDirection + 1) % currentTetrimino.position.length;
+					for(Point p : currentTetrimino.position[nextDirection]) {
+						Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y];
+						if(color != null) {
+							turn = false;
+							break;
+						}
+					}
+					
+					if(turn) {
+						currentDirection = nextDirection;
 					}
 				}
 				
