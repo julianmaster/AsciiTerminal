@@ -37,6 +37,7 @@ public class AsciiTetris {
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
 	private double FPS = 1f;
+	private double SOFT_DROP_FPS = 30f;
 	
 	private double timer = 0d;
 	private Point currentPosition = null;
