@@ -13,7 +13,7 @@ import ui.AsciiTerminal;
 public class AsciiTetris {
 	public static final int WINDOW_WIDTH = 22;
 	public static final int WINDOW_HEIGHT = 24;
-	public static final int SCALE = 3;
+	public static final int SCALE = 1;
 	public static final boolean CUSTOM_WINDOW = true;
 	
 	public static final String TILESET = "/assets/Yoshis_island_9x12.png";
@@ -292,6 +292,10 @@ public class AsciiTetris {
 		currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
 		currentDirection = 0;
 		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 0);
+	}
+	
+	public double tickDuration(int level) {
+		return Math.pow((0.8-((1-1)*0.007)),(1-1));
 	}
 	
 	public static void main(String[] args) {
