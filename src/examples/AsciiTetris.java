@@ -38,8 +38,8 @@ public class AsciiTetris {
 	private int level = 1;
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
-	private double FPS = 1f;
-	private double SOFT_DROP_FPS = 30f;
+//	private double FPS = 1f;
+//	private double SOFT_DROP_FPS = 30f;
 	
 	private double timer = 0d;
 	private Point currentPosition = null;
@@ -127,33 +127,7 @@ public class AsciiTetris {
 			/**
 			 * UPDATE
 			 */
-			
-			timer += delta;
-			if(timer >= tickDuration(level)*100) { //TARGET_FPS / FPS
-				boolean goDown = true;
-				for(Point p : currentTetrimino.position[currentDirection]) {
-					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
-						goDown = false;
-						break;
-					}
-					Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y + 1];
-					if(color != null) {
-						goDown = false;
-						break;
-					}
-				}
-				
-				if(goDown) {
-					timer = 0;
-					currentPosition.y += 1;
-				}
-				else {
-					for(Point p : currentTetrimino.position[currentDirection]) {
-						cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
-					}
-					newTetrimino();
-				}
-			}
+			boolean softDrop = false;
 			
 			// KEY EVENT
 			if(event != null) {
@@ -214,10 +188,47 @@ public class AsciiTetris {
 						currentDirection = nextDirection;
 					}
 				}
+				if(event.getKeyCode() == KeyEvent.VK_DOWN) {
+					softDrop = true;
+				}
 				
 				event = null;
 			}
 
+			// DROP SPEED & SOFT DROP
+			double tickDuration = tickDuration(level)*100;
+			if(softDrop) {
+				tickDuration = SOFT_DROP_SPEED;
+			}
+			
+			// TICK
+			timer += delta;
+			if(timer >= tickDuration) {
+				boolean goDown = true;
+				for(Point p : currentTetrimino.position[currentDirection]) {
+					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
+						goDown = false;
+						break;
+					}
+					Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y + 1];
+					if(color != null) {
+						goDown = false;
+						break;
+					}
+				}
+				
+				if(goDown) {
+					timer = 0;
+					currentPosition.y += 1;
+				}
+				else {
+					for(Point p : currentTetrimino.position[currentDirection]) {
+						cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
+					}
+					newTetrimino();
+				}
+			}
+			
 			
 			
 			
