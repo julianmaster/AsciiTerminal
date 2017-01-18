@@ -38,9 +38,6 @@ public class AsciiTetris {
 	private int level = 1;
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
-//	private double FPS = 1f;
-//	private double SOFT_DROP_FPS = 30f;
-	
 	private double timer = 0d;
 	private Point currentPosition = null;
 	private int currentDirection = 0;
@@ -204,6 +201,10 @@ public class AsciiTetris {
 			// TICK
 			timer += delta;
 			if(timer >= tickDuration) {
+				if(softDrop) {
+					score += SOFT_DROP_BONUS_POINT;
+				}
+				
 				boolean goDown = true;
 				for(Point p : currentTetrimino.position[currentDirection]) {
 					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
@@ -319,8 +320,6 @@ public class AsciiTetris {
 	
 	public static void main(String[] args) {
 		AsciiTetris asciiTetris = new AsciiTetris();
-		System.out.println(asciiTetris.tickDuration(1));
-		System.out.println(asciiTetris.tickDuration(10));
 		asciiTetris.run();
 	}
 }
