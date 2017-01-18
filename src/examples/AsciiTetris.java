@@ -15,11 +15,9 @@ public class AsciiTetris {
 	public static final int WINDOW_HEIGHT = 24;
 	public static final int SCALE = 1;
 	public static final boolean CUSTOM_WINDOW = true;
-	
 	public static final String TILESET = "/assets/Yoshis_island_9x12.png";
 	public static final int CHARACTER_WIDTH = 9;
 	public static final int CHARACTER_HEIGHT = 12;
-	
 	public static final int TARGET_FPS = 60;
 	public static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 	
@@ -27,13 +25,17 @@ public class AsciiTetris {
 	public static final int PLAYFIELD_HEIGHT = 22;
 	public static final int DISPLAY_PLAYFIELD_HEIGHT = 20;
 	
+	public static final float SOFT_DROP_SPEED = 0.05f;
+	public static final int SOFT_DROP_BONUS_POINT = 6;
+	
 	private AsciiTerminal asciiTerminal;
 	private AsciiPanel asciiPanel;
 	private KeyEvent event;
 	
 	private Random rand = new Random();
-	private int score = 0;
 	
+	private int score = 0;
+	private int level = 1;
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
 	private double FPS = 1f;
@@ -127,7 +129,7 @@ public class AsciiTetris {
 			 */
 			
 			timer += delta;
-			if(timer >= TARGET_FPS / FPS) {
+			if(timer >= tickDuration(level)*100) { //TARGET_FPS / FPS
 				boolean goDown = true;
 				for(Point p : currentTetrimino.position[currentDirection]) {
 					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
@@ -195,8 +197,14 @@ public class AsciiTetris {
 					boolean turn = true;
 					int nextDirection = (currentDirection + 1) % currentTetrimino.position.length;
 					for(Point p : currentTetrimino.position[nextDirection]) {
-						Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y];
-						if(color != null) {
+						if(p.x + currentPosition.x > 0 && p.x + currentPosition.x < PLAYFIELD_WIDTH && p.y + currentPosition.y > 0 && p.y + currentPosition.y < PLAYFIELD_HEIGHT) {
+							Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y];
+							if(color != null) {
+								turn = false;
+								break;
+							}
+						}
+						else {
 							turn = false;
 							break;
 						}
@@ -295,11 +303,13 @@ public class AsciiTetris {
 	}
 	
 	public double tickDuration(int level) {
-		return Math.pow((0.8-((1-1)*0.007)),(1-1));
+		return Math.pow((0.8-((level-1)*0.007)),(level-1));
 	}
 	
 	public static void main(String[] args) {
 		AsciiTetris asciiTetris = new AsciiTetris();
+		System.out.println(asciiTetris.tickDuration(1));
+		System.out.println(asciiTetris.tickDuration(10));
 		asciiTetris.run();
 	}
 }
