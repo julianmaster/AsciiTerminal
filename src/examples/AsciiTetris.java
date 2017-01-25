@@ -41,6 +41,8 @@ public class AsciiTetris {
 	private double timer = 0d;
 	private Point currentPosition = null;
 	private int currentDirection = 0;
+	
+	private Tetrimino nextTetrimino = null;
 	private Tetrimino currentTetrimino = null;
 	
 	enum Tetrimino {
@@ -291,6 +293,9 @@ public class AsciiTetris {
 				asciiPanel.write(14,7+j, (char)179, color);
 				asciiPanel.write(20, 7+j, (char)179, color);
 			}
+			for(Point p : nextTetrimino.position[0]) {
+				asciiPanel.write(15+p.x, 8+p.y, ' ', Color.WHITE, nextTetrimino.color);
+			}
 			
 			asciiTerminal.repaint();
 			
@@ -309,9 +314,16 @@ public class AsciiTetris {
 	
 	public void newTetrimino() {
 		Tetrimino[] tetriminos = Tetrimino.values();
-		currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+		if(nextTetrimino != null) {
+			currentTetrimino = nextTetrimino;
+			nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+		}
+		else {
+			nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+			currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+		}
 		currentDirection = 0;
-		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 0);
+		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 2);
 	}
 	
 	public double tickDuration(int level) {
