@@ -203,6 +203,7 @@ public class AsciiTetris {
 			// TICK
 			timer += delta;
 			if(timer >= tickDuration) {
+				timer = 0;
 				if(softDrop) {
 					score += SOFT_DROP_BONUS_POINT;
 				}
@@ -221,13 +222,38 @@ public class AsciiTetris {
 				}
 				
 				if(goDown) {
-					timer = 0;
 					currentPosition.y += 1;
 				}
 				else {
 					for(Point p : currentTetrimino.position[currentDirection]) {
 						cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
 					}
+					
+					int y = PLAYFIELD_HEIGHT-1;
+					while(y > 1) {
+						boolean fullLine = true;
+						for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
+							if(cells[x][y] == null) {
+								fullLine = false;
+								break;
+							}
+						}
+						System.out.println("Y: "+y+" - "+fullLine);
+						
+						if(fullLine) {
+							for(int y2 = y-1; y2 > 1; y2--) {
+								for(int x2 = 0; x2 < PLAYFIELD_WIDTH; x2++) {
+									cells[x2][y2+1] = cells[x2][y2];
+								}
+							}
+						}
+						else {
+							y--;
+						}
+					}
+					
+					System.out.println("-------------");
+
 					newTetrimino();
 				}
 			}
