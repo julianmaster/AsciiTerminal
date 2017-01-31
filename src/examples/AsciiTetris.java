@@ -13,7 +13,7 @@ import ui.AsciiTerminal;
 public class AsciiTetris {
 	public static final int WINDOW_WIDTH = 22;
 	public static final int WINDOW_HEIGHT = 24;
-	public static final int SCALE = 1;
+	public static final int SCALE = 2;
 	public static final boolean CUSTOM_WINDOW = true;
 	public static final String TILESET = "/assets/Yoshis_island_9x12.png";
 	public static final int CHARACTER_WIDTH = 9;
@@ -35,7 +35,8 @@ public class AsciiTetris {
 	private Random rand = new Random();
 	
 	private int score = 0;
-	private int level = 1;
+	private int level = 0;
+	private int scoreLevel = 0;
 	private Color[][] cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
 	
 	private double timer = 0d;
@@ -195,7 +196,7 @@ public class AsciiTetris {
 			}
 
 			// DROP SPEED & SOFT DROP
-			double tickDuration = tickDuration(level)*100;
+			double tickDuration = tickDuration()*100;
 			if(softDrop) {
 				tickDuration = SOFT_DROP_SPEED;
 			}
@@ -229,6 +230,7 @@ public class AsciiTetris {
 						cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
 					}
 					
+					int fullLineCount = 0;
 					int y = PLAYFIELD_HEIGHT-1;
 					while(y > 1) {
 						boolean fullLine = true;
@@ -241,6 +243,7 @@ public class AsciiTetris {
 						System.out.println("Y: "+y+" - "+fullLine);
 						
 						if(fullLine) {
+							fullLineCount++;
 							for(int y2 = y-1; y2 > 1; y2--) {
 								for(int x2 = 0; x2 < PLAYFIELD_WIDTH; x2++) {
 									cells[x2][y2+1] = cells[x2][y2];
@@ -251,6 +254,8 @@ public class AsciiTetris {
 							y--;
 						}
 					}
+					
+					scoring(fullLineCount);
 					
 					System.out.println("-------------");
 
@@ -303,24 +308,29 @@ public class AsciiTetris {
 			
 			// SCORE
 			asciiPanel.writeString(15, 2, "SCORE", Color.BLUE);
-			asciiPanel.writeString(15, 3, String.format("%05d",score), Color.CYAN);
+			asciiPanel.writeString(15, 3, String.format("%05d", score), Color.CYAN);
+			
+			// LEVEL
+			asciiPanel.writeString(15, 5, "LEVEL", Color.BLUE);
+			asciiPanel.writeString(15, 6, String.format("%05d", level), Color.CYAN);
 			
 			// NEXT TETROMINOS
-			asciiPanel.writeString(15, 5, "NEXT", Color.BLUE);
-			asciiPanel.write(14, 6, (char)218, color);
-			asciiPanel.write(20, 6, (char)191, color);
-			asciiPanel.write(14, 12, (char)192, color);
-			asciiPanel.write(20, 12, (char)217, color);
+			int nextTetriminosYOffset = 8;
+			asciiPanel.writeString(15, nextTetriminosYOffset, "NEXT", Color.BLUE);
+			asciiPanel.write(14, nextTetriminosYOffset+1, (char)218, color);
+			asciiPanel.write(20, nextTetriminosYOffset+1, (char)191, color);
+			asciiPanel.write(14, nextTetriminosYOffset+7, (char)192, color);
+			asciiPanel.write(20, nextTetriminosYOffset+7, (char)217, color);
 			for(int i = 0; i < 5; i++) {
-				asciiPanel.write(15+i, 6, (char)196, color);
-				asciiPanel.write(15+i, 12, (char)196, color);
+				asciiPanel.write(15+i, nextTetriminosYOffset+1, (char)196, color);
+				asciiPanel.write(15+i, nextTetriminosYOffset+7, (char)196, color);
 			}
 			for(int j = 0; j < 5; j++) {
-				asciiPanel.write(14,7+j, (char)179, color);
-				asciiPanel.write(20, 7+j, (char)179, color);
+				asciiPanel.write(14, nextTetriminosYOffset+2+j, (char)179, color);
+				asciiPanel.write(20, nextTetriminosYOffset+2+j, (char)179, color);
 			}
 			for(Point p : nextTetrimino.position[0]) {
-				asciiPanel.write(15+p.x, 8+p.y, ' ', Color.WHITE, nextTetrimino.color);
+				asciiPanel.write(15+p.x, nextTetriminosYOffset+3+p.y, ' ', Color.WHITE, nextTetrimino.color);
 			}
 			
 			asciiTerminal.repaint();
@@ -352,8 +362,40 @@ public class AsciiTetris {
 		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 2);
 	}
 	
-	public double tickDuration(int level) {
+	public double tickDuration() {
 		return Math.pow((0.8-((level-1)*0.007)),(level-1));
+	}
+	
+	public void scoring(int lines) {
+		System.out.println("Level: "+level+" - scoreLevel: "+scoreLevel+" - score: "+score);
+		if(lines == 1) {
+			score += 40 * (level + 1);
+			scoreLevel += 1;
+		}
+		else if(lines == 2) {
+			score += 100 * (level + 1);
+			scoreLevel += 3;
+		}
+		else if(lines == 3) {
+			score += 300 * (level + 1);
+			scoreLevel += 5;
+		}
+		else if(lines == 4) {
+			score += 1200 * (level + 1);
+			scoreLevel += 8;
+		}
+		System.out.println("Level: "+level+" - scoreLevel: "+scoreLevel+" - score: "+score);
+		
+		level = suiteScoreLevel(1, scoreLevel);
+	}
+	
+	public int suiteScoreLevel(int level, int scoreLevel) {
+		if(scoreLevel >= level * 5) {
+			return suiteScoreLevel(level+1, scoreLevel - (level * 5));
+		}
+		else {
+			return level;
+		}
 	}
 	
 	public static void main(String[] args) {
