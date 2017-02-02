@@ -307,27 +307,27 @@ public class AsciiTetris {
 			}
 			
 			// SCORE
-			asciiPanel.writeString(15, 2, "SCORE", Color.BLUE);
-			asciiPanel.writeString(15, 3, String.format("%05d", score), Color.CYAN);
+			asciiPanel.writeString(14, 2, "SCORE", Color.BLUE);
+			asciiPanel.writeString(14, 3, String.format("%06d", score), Color.CYAN);
 			
 			// LEVEL
-			asciiPanel.writeString(15, 5, "LEVEL", Color.BLUE);
-			asciiPanel.writeString(15, 6, String.format("%05d", level), Color.CYAN);
+			asciiPanel.writeString(14, 5, "LEVEL", Color.BLUE);
+			asciiPanel.writeString(14, 6, String.format("%06d", level), Color.CYAN);
 			
 			// NEXT TETROMINOS
 			int nextTetriminosYOffset = 8;
-			asciiPanel.writeString(15, nextTetriminosYOffset, "NEXT", Color.BLUE);
+			asciiPanel.writeString(14, nextTetriminosYOffset, "NEXT", Color.BLUE);
 			asciiPanel.write(14, nextTetriminosYOffset+1, (char)218, color);
-			asciiPanel.write(20, nextTetriminosYOffset+1, (char)191, color);
+			asciiPanel.write(19, nextTetriminosYOffset+1, (char)191, color);
 			asciiPanel.write(14, nextTetriminosYOffset+7, (char)192, color);
-			asciiPanel.write(20, nextTetriminosYOffset+7, (char)217, color);
-			for(int i = 0; i < 5; i++) {
+			asciiPanel.write(19, nextTetriminosYOffset+7, (char)217, color);
+			for(int i = 0; i < 4; i++) {
 				asciiPanel.write(15+i, nextTetriminosYOffset+1, (char)196, color);
 				asciiPanel.write(15+i, nextTetriminosYOffset+7, (char)196, color);
 			}
 			for(int j = 0; j < 5; j++) {
 				asciiPanel.write(14, nextTetriminosYOffset+2+j, (char)179, color);
-				asciiPanel.write(20, nextTetriminosYOffset+2+j, (char)179, color);
+				asciiPanel.write(19, nextTetriminosYOffset+2+j, (char)179, color);
 			}
 			for(Point p : nextTetrimino.position[0]) {
 				asciiPanel.write(15+p.x, nextTetriminosYOffset+3+p.y, ' ', Color.WHITE, nextTetrimino.color);
@@ -386,12 +386,12 @@ public class AsciiTetris {
 		}
 		System.out.println("Level: "+level+" - scoreLevel: "+scoreLevel+" - score: "+score);
 		
-		level = suiteScoreLevel(1, scoreLevel);
+		level = suiteScoreLevel(0, scoreLevel);
 	}
 	
 	public int suiteScoreLevel(int level, int scoreLevel) {
-		if(scoreLevel >= level * 5) {
-			return suiteScoreLevel(level+1, scoreLevel - (level * 5));
+		if(scoreLevel >= (level + 1) * 5) {
+			return suiteScoreLevel(level+1, scoreLevel - ((level + 1) * 5));
 		}
 		else {
 			return level;
