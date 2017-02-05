@@ -11,9 +11,9 @@ import ui.AsciiPanel;
 import ui.AsciiTerminal;
 
 public class AsciiTetris {
-	public static final int WINDOW_WIDTH = 22;
+	public static final int WINDOW_WIDTH = 21;
 	public static final int WINDOW_HEIGHT = 24;
-	public static final int SCALE = 2;
+	public static final int SCALE = 3;
 	public static final boolean CUSTOM_WINDOW = true;
 	public static final String TILESET = "/assets/Yoshis_island_9x12.png";
 	public static final int CHARACTER_WIDTH = 9;
@@ -45,42 +45,43 @@ public class AsciiTetris {
 	
 	private Tetrimino nextTetrimino = null;
 	private Tetrimino currentTetrimino = null;
+	private int countSameTetrimino = 0;
 	
 	enum Tetrimino {
-		I(Color.CYAN, 4, new Point[][]{
+		I(Color.CYAN, 4, new Point(3, 1), new Point[][]{
 			new Point[]{new Point(0,1), new Point(1,1), new Point(2,1), new Point(3,1)},
 			new Point[]{new Point(2,0), new Point(2,1), new Point(2,2), new Point(2,3)},
 			new Point[]{new Point(0,2), new Point(1,2), new Point(2,2), new Point(3,2)},
 			new Point[]{new Point(1,0), new Point(1,1), new Point(1,2), new Point(1,3)}
 		}),
-		O(Color.YELLOW, 4, new Point[][]{
+		O(Color.YELLOW, 4, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(1,0), new Point(2,0), new Point(1,1), new Point(2,1)}
 		}),
-		T(Color.MAGENTA, 3, new Point[][]{
+		T(Color.MAGENTA, 3, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(1,0), new Point(0,1), new Point(1,1), new Point(2,1)},
 			new Point[]{new Point(1,0), new Point(1,1), new Point(2,1), new Point(1,2)},
 			new Point[]{new Point(0,1), new Point(1,1), new Point(2,1), new Point(1,2)},
 			new Point[]{new Point(1,0), new Point(0,1), new Point(1,1), new Point(1,2)},
 		}),
-		L(Color.ORANGE, 3, new Point[][]{
+		L(Color.ORANGE, 3, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(2,0), new Point(0,1), new Point(1,1), new Point(2,1)},
 			new Point[]{new Point(1,0), new Point(1,1), new Point(1,2), new Point(2,2)},
 			new Point[]{new Point(0,1), new Point(1,1), new Point(2,1), new Point(0,2)},
 			new Point[]{new Point(0,0), new Point(1,0), new Point(1,1), new Point(1,2)}
 		}),
-		J(Color.BLUE, 3, new Point[][]{
+		J(Color.BLUE, 3, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(0,0), new Point(0,1), new Point(1,1), new Point(2,1)},
 			new Point[]{new Point(1,0), new Point(2,0), new Point(1,1), new Point(1,2)},
 			new Point[]{new Point(0,1), new Point(1,1), new Point(2,1), new Point(2,2)},
 			new Point[]{new Point(1,0), new Point(1,1), new Point(0,2), new Point(1,2)}
 		}),
-		Z(Color.RED, 3, new Point[][]{
+		Z(Color.RED, 3, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(0,0), new Point(1,0), new Point(1,1), new Point(2,1)},
 			new Point[]{new Point(2,0), new Point(1,1), new Point(2,1), new Point(1,2)},
 			new Point[]{new Point(0,1), new Point(1,1), new Point(1,2), new Point(2,2)},
 			new Point[]{new Point(1,0), new Point(0,1), new Point(1,1), new Point(0,2)}
 		}),
-		S(Color.GREEN, 3, new Point[][]{
+		S(Color.GREEN, 3, new Point(3, 2), new Point[][]{
 			new Point[]{new Point(1,0), new Point(2,0),new Point(0,1),new Point(1,1)},
 			new Point[]{new Point(1,0), new Point(1,1),new Point(2,1),new Point(2,2)},
 			new Point[]{new Point(1,1), new Point(2,1),new Point(0,2),new Point(1,2)},
@@ -89,11 +90,13 @@ public class AsciiTetris {
 		
 		public Color color;
 		public int width;
+		public Point startPosition;
 		public Point[][] position;
 
-		private Tetrimino(Color color, int width, Point[][] position) {
+		private Tetrimino(Color color, int width, Point startPosition, Point[][] position) {
 			this.color = color;
 			this.width = width;
+			this.startPosition = startPosition;
 			this.position = position;
 		}
 	}
@@ -240,7 +243,6 @@ public class AsciiTetris {
 								break;
 							}
 						}
-						System.out.println("Y: "+y+" - "+fullLine);
 						
 						if(fullLine) {
 							fullLineCount++;
@@ -257,8 +259,6 @@ public class AsciiTetris {
 					
 					scoring(fullLineCount);
 					
-					System.out.println("-------------");
-
 					newTetrimino();
 				}
 			}
@@ -319,18 +319,18 @@ public class AsciiTetris {
 			asciiPanel.writeString(14, nextTetriminosYOffset, "NEXT", Color.BLUE);
 			asciiPanel.write(14, nextTetriminosYOffset+1, (char)218, color);
 			asciiPanel.write(19, nextTetriminosYOffset+1, (char)191, color);
-			asciiPanel.write(14, nextTetriminosYOffset+7, (char)192, color);
-			asciiPanel.write(19, nextTetriminosYOffset+7, (char)217, color);
+			asciiPanel.write(14, nextTetriminosYOffset+5, (char)192, color);
+			asciiPanel.write(19, nextTetriminosYOffset+5, (char)217, color);
 			for(int i = 0; i < 4; i++) {
 				asciiPanel.write(15+i, nextTetriminosYOffset+1, (char)196, color);
-				asciiPanel.write(15+i, nextTetriminosYOffset+7, (char)196, color);
+				asciiPanel.write(15+i, nextTetriminosYOffset+5, (char)196, color);
 			}
-			for(int j = 0; j < 5; j++) {
+			for(int j = 0; j < 3; j++) {
 				asciiPanel.write(14, nextTetriminosYOffset+2+j, (char)179, color);
 				asciiPanel.write(19, nextTetriminosYOffset+2+j, (char)179, color);
 			}
 			for(Point p : nextTetrimino.position[0]) {
-				asciiPanel.write(15+p.x, nextTetriminosYOffset+3+p.y, ' ', Color.WHITE, nextTetrimino.color);
+				asciiPanel.write(15+p.x, nextTetriminosYOffset+2+p.y, ' ', Color.WHITE, nextTetrimino.color);
 			}
 			
 			asciiTerminal.repaint();
@@ -350,16 +350,30 @@ public class AsciiTetris {
 	
 	public void newTetrimino() {
 		Tetrimino[] tetriminos = Tetrimino.values();
-		if(nextTetrimino != null) {
-			currentTetrimino = nextTetrimino;
-			nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
-		}
-		else {
-			nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
-			currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
-		}
+		boolean change = false;
+		do {
+			if(nextTetrimino != null) {
+				currentTetrimino = nextTetrimino;
+				nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+			}
+			else {
+				nextTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+				currentTetrimino = tetriminos[rand.nextInt(tetriminos.length)];
+			}
+			
+			if(nextTetrimino == currentTetrimino && countSameTetrimino < 1) {
+				countSameTetrimino++;
+			}
+			if(nextTetrimino == currentTetrimino && countSameTetrimino >= 1) {
+				change = true;
+			}
+			else {
+				countSameTetrimino = 0;
+				change = false;
+			}
+		}while(change);
 		currentDirection = 0;
-		currentPosition = new Point(PLAYFIELD_WIDTH/2 - currentTetrimino.width/2, 2);
+		currentPosition = (Point)currentTetrimino.startPosition.clone();
 	}
 	
 	public double tickDuration() {
