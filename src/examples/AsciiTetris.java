@@ -111,6 +111,12 @@ public class AsciiTetris {
 		}
 	}
 	
+	enum GAMESTATE {
+		MENU,
+		START,
+		PLAY,
+		GAME_OVER;
+	}
 	
 	
 	
@@ -146,183 +152,8 @@ public class AsciiTetris {
 			lastLoopTime = now;
 			double delta = updateLength / OPTIMAL_TIME;
 			
-			
-			
-			
-			
-			
 			/**
-			 * UPDATE
-			 */
-			boolean softDrop = false;
-			
-			// KEY EVENT
-			if(event != null) {
-				if(event.getKeyCode() == KeyEvent.VK_UP) {
-					boolean turn = turnTetrimino(currentPosition);
-					if(!turn) {
-						turn = turnTetrimino(new Point(currentPosition.x - 1, currentPosition.y));
-						if(!turn) {
-							turnTetrimino(new Point(currentPosition.x + 1, currentPosition.y));
-						}
-					}
-				}
-				
-				event = null;
-			}
-			
-			
-			
-			
-			if(continueKeyEvents.isEmpty()) {
-				timerKeyEvent = 0;
-				waitEvent = REPEAT_KEY_EVENT;
-			}
-			else {
-				timerKeyEvent += delta;
-				waitEvent = Math.max(waitEvent, REPEAT_KEY_EVENT);
-			}
-			
-			if((timerKeyEvent >= waitEvent && !continueKeyEvents.isEmpty()) || !instantKeyEvents.isEmpty()) {
-				timerKeyEvent %= waitEvent;
-				waitEvent = 0;
-				
-				System.out.println(instantKeyEvents);
-				
-				if(instantKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
-					waitEvent = REPEAT_KEY_EVENT * 2;
-				}
-			
-				if(continueKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_LEFT)) {
-					instantKeyEvents.clear(KeyEvent.VK_LEFT);
-					
-					boolean goLeft = true;
-					for(Point p : currentTetrimino.position[currentDirection]) {
-						if(p.x + currentPosition.x - 1 < 0) {
-							goLeft = false;
-							break;
-						}
-						Color color = cells[p.x + currentPosition.x - 1][p.y + currentPosition.y];
-						if(color != null) {
-							goLeft = false;
-							break;
-						}
-					}
-					
-					if(goLeft) {
-						currentPosition.x -= 1;
-					}
-				}
-				if(continueKeyEvents.get(KeyEvent.VK_RIGHT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
-					instantKeyEvents.clear(KeyEvent.VK_RIGHT);
-					
-					boolean goRight = true;
-					for(Point p : currentTetrimino.position[currentDirection]) {
-						if(p.x + currentPosition.x + 1 >= PLAYFIELD_WIDTH) {
-							goRight = false;
-							break;
-						}
-						Color color = cells[p.x + currentPosition.x + 1][p.y + currentPosition.y];
-						if(color != null) {
-							goRight = false;
-							break;
-						}
-					}
-					
-					if(goRight) {
-						currentPosition.x += 1;
-					}
-				}
-				if(continueKeyEvents.get(KeyEvent.VK_DOWN) || instantKeyEvents.get(KeyEvent.VK_DOWN)) {
-					instantKeyEvents.clear(KeyEvent.VK_DOWN);
-					softDrop = true;
-				}
-				
-				instantKeyEvents.clear();
-			}
-
-			
-			
-			
-			// DROP SPEED & SOFT DROP
-			double tickDuration = tickDuration()*100;
-			if(softDrop) {
-				tickDuration = SOFT_DROP_SPEED;
-			}
-			else {
-				timer += delta;
-			}
-			
-			// TICK
-			if(timer >= tickDuration) {
-				timer -= tickDuration;
-				if(softDrop) {
-					score += SOFT_DROP_BONUS_POINT;
-				}
-				
-				boolean goDown = true;
-				for(Point p : currentTetrimino.position[currentDirection]) {
-					if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
-						goDown = false;
-						break;
-					}
-					Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y + 1];
-					if(color != null) {
-						goDown = false;
-						break;
-					}
-				}
-				
-				if(goDown) {
-					currentPosition.y += 1;
-				}
-				else {
-					for(Point p : currentTetrimino.position[currentDirection]) {
-						cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
-					}
-					
-					int fullLineCount = 0;
-					int y = PLAYFIELD_HEIGHT-1;
-					while(y > 1) {
-						boolean fullLine = true;
-						for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
-							if(cells[x][y] == null) {
-								fullLine = false;
-								break;
-							}
-						}
-						
-						if(fullLine) {
-							fullLineCount++;
-							for(int y2 = y-1; y2 > 1; y2--) {
-								for(int x2 = 0; x2 < PLAYFIELD_WIDTH; x2++) {
-									cells[x2][y2+1] = cells[x2][y2];
-								}
-							}
-						}
-						else {
-							y--;
-						}
-					}
-					
-					scoring(fullLineCount);
-					
-					newTetrimino();
-				}
-			}
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			/**
-			 * DRAW
+			 * DRAW BASE
 			 */
 			
 			asciiPanel.clear();
@@ -342,23 +173,6 @@ public class AsciiTetris {
 				asciiPanel.write(12, 2+j, (char)186, color);
 			}
 			
-			// PLAYFIELD
-			int xOffset = 2;
-			int yOffset = 2;
-			for(int i = 0; i < PLAYFIELD_WIDTH; i++) {
-				for(int j = PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT; j < PLAYFIELD_HEIGHT; j++) {
-					if(cells[i][j] != null) {
-						asciiPanel.write(i + xOffset, j + yOffset - (PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT), ' ', Color.WHITE, cells[i][j]);
-					}
-				}
-			}
-			
-			for(Point p : currentTetrimino.position[currentDirection]) {
-				if(p.y + currentPosition.y + yOffset - 2 > 1) {
-					asciiPanel.write(p.x+currentPosition.x+xOffset, p.y+currentPosition.y+yOffset - 2, ' ', Color.WHITE, currentTetrimino.color);
-				}
-			}
-			
 			// SCORE
 			asciiPanel.writeString(14, 2, "SCORE", Color.BLUE);
 			asciiPanel.writeString(14, 3, String.format("%06d", score), Color.CYAN);
@@ -367,24 +181,25 @@ public class AsciiTetris {
 			asciiPanel.writeString(14, 5, "LEVEL", Color.BLUE);
 			asciiPanel.writeString(14, 6, String.format("%06d", level), Color.CYAN);
 			
-			// NEXT TETROMINOS
-			int nextTetriminosYOffset = 8;
-			asciiPanel.writeString(15, nextTetriminosYOffset, "NEXT", Color.BLUE);
-			asciiPanel.write(14, nextTetriminosYOffset+1, (char)218, color);
-			asciiPanel.write(19, nextTetriminosYOffset+1, (char)191, color);
-			asciiPanel.write(14, nextTetriminosYOffset+4, (char)192, color);
-			asciiPanel.write(19, nextTetriminosYOffset+4, (char)217, color);
+			// NEXT TETROMINO BORDER
+			asciiPanel.writeString(15, 8, "NEXT", Color.BLUE);
+			asciiPanel.write(14, 9, (char)218, color);
+			asciiPanel.write(19, 9, (char)191, color);
+			asciiPanel.write(14, 12, (char)192, color);
+			asciiPanel.write(19, 12, (char)217, color);
 			for(int i = 0; i < 4; i++) {
-				asciiPanel.write(15+i, nextTetriminosYOffset+1, (char)196, color);
-				asciiPanel.write(15+i, nextTetriminosYOffset+4, (char)196, color);
+				asciiPanel.write(15+i, 9, (char)196, color);
+				asciiPanel.write(15+i, 12, (char)196, color);
 			}
 			for(int j = 0; j < 2; j++) {
-				asciiPanel.write(14, nextTetriminosYOffset+2+j, (char)179, color);
-				asciiPanel.write(19, nextTetriminosYOffset+2+j, (char)179, color);
+				asciiPanel.write(14, 10+j, (char)179, color);
+				asciiPanel.write(19, 10+j, (char)179, color);
 			}
-			for(Point p : nextTetrimino.position[0]) {
-				asciiPanel.write(15+p.x, nextTetriminosYOffset+2+p.y, ' ', Color.WHITE, nextTetrimino.color);
-			}
+			
+			
+			playGame(delta);
+			
+			
 			
 			asciiTerminal.repaint();
 			
@@ -400,6 +215,228 @@ public class AsciiTetris {
 			}
 		}
 	}
+	
+	public void menuGame() {
+		
+	}
+	
+	public void initGame() {
+		score = 0;
+		level = 0;
+		scoreLevel = 0;
+		cells = new Color[PLAYFIELD_WIDTH][PLAYFIELD_HEIGHT];
+		timer = 0d;
+		currentPosition = null;
+		currentDirection = 0;
+		nextTetrimino = null;
+		currentTetrimino = null;
+		countSameTetrimino = 0;
+	}
+	
+	public void playGame(double delta) {
+		/**
+		 * UPDATE
+		 */
+		boolean softDrop = false;
+		
+		// KEY EVENT
+		if(event != null) {
+			if(event.getKeyCode() == KeyEvent.VK_UP) {
+				boolean turn = turnTetrimino(currentPosition);
+				if(!turn) {
+					turn = turnTetrimino(new Point(currentPosition.x - 1, currentPosition.y));
+					if(!turn) {
+						turnTetrimino(new Point(currentPosition.x + 1, currentPosition.y));
+					}
+				}
+			}
+			
+			event = null;
+		}
+		
+		
+		
+		if(continueKeyEvents.isEmpty()) {
+			timerKeyEvent = 0;
+			waitEvent = REPEAT_KEY_EVENT;
+		}
+		else {
+			timerKeyEvent += delta;
+			waitEvent = Math.max(waitEvent, REPEAT_KEY_EVENT);
+		}
+		
+		if((timerKeyEvent >= waitEvent && !continueKeyEvents.isEmpty()) || !instantKeyEvents.isEmpty()) {
+			timerKeyEvent %= waitEvent;
+			waitEvent = 0;
+			
+			if(instantKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
+				waitEvent = REPEAT_KEY_EVENT * 2;
+			}
+		
+			if(continueKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_LEFT)) {
+				instantKeyEvents.clear(KeyEvent.VK_LEFT);
+				
+				boolean goLeft = true;
+				for(Point p : currentTetrimino.position[currentDirection]) {
+					if(p.x + currentPosition.x - 1 < 0) {
+						goLeft = false;
+						break;
+					}
+					Color color = cells[p.x + currentPosition.x - 1][p.y + currentPosition.y];
+					if(color != null) {
+						goLeft = false;
+						break;
+					}
+				}
+				
+				if(goLeft) {
+					currentPosition.x -= 1;
+				}
+			}
+			if(continueKeyEvents.get(KeyEvent.VK_RIGHT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
+				instantKeyEvents.clear(KeyEvent.VK_RIGHT);
+				
+				boolean goRight = true;
+				for(Point p : currentTetrimino.position[currentDirection]) {
+					if(p.x + currentPosition.x + 1 >= PLAYFIELD_WIDTH) {
+						goRight = false;
+						break;
+					}
+					Color color = cells[p.x + currentPosition.x + 1][p.y + currentPosition.y];
+					if(color != null) {
+						goRight = false;
+						break;
+					}
+				}
+				
+				if(goRight) {
+					currentPosition.x += 1;
+				}
+			}
+			if(continueKeyEvents.get(KeyEvent.VK_DOWN) || instantKeyEvents.get(KeyEvent.VK_DOWN)) {
+				instantKeyEvents.clear(KeyEvent.VK_DOWN);
+				softDrop = true;
+			}
+			
+			instantKeyEvents.clear();
+		}
+
+		
+		
+		
+		// DROP SPEED & SOFT DROP
+		double tickDuration = tickDuration()*100;
+		if(softDrop) {
+			tickDuration = SOFT_DROP_SPEED;
+		}
+		else {
+			timer += delta;
+		}
+		
+		// TICK
+		if(timer >= tickDuration) {
+			timer -= tickDuration;
+			if(softDrop) {
+				score += SOFT_DROP_BONUS_POINT;
+			}
+			
+			boolean goDown = true;
+			for(Point p : currentTetrimino.position[currentDirection]) {
+				if(p.y + currentPosition.y + 1 >= PLAYFIELD_HEIGHT) {
+					goDown = false;
+					break;
+				}
+				Color color = cells[p.x + currentPosition.x][p.y + currentPosition.y + 1];
+				if(color != null) {
+					goDown = false;
+					break;
+				}
+			}
+			
+			if(goDown) {
+				currentPosition.y += 1;
+			}
+			else {
+				for(Point p : currentTetrimino.position[currentDirection]) {
+					cells[p.x+currentPosition.x][p.y+currentPosition.y] = currentTetrimino.color;
+				}
+				
+				int fullLineCount = 0;
+				int y = PLAYFIELD_HEIGHT-1;
+				while(y > 1) {
+					boolean fullLine = true;
+					for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
+						if(cells[x][y] == null) {
+							fullLine = false;
+							break;
+						}
+					}
+					
+					if(fullLine) {
+						fullLineCount++;
+						for(int y2 = y-1; y2 > 1; y2--) {
+							for(int x2 = 0; x2 < PLAYFIELD_WIDTH; x2++) {
+								cells[x2][y2+1] = cells[x2][y2];
+							}
+						}
+					}
+					else {
+						y--;
+					}
+				}
+				
+				scoring(fullLineCount);
+				
+				newTetrimino();
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		/**
+		 * DRAW
+		 */
+		
+		// PLAYFIELD
+		int xOffset = 2;
+		int yOffset = 2;
+		for(int i = 0; i < PLAYFIELD_WIDTH; i++) {
+			for(int j = PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT; j < PLAYFIELD_HEIGHT; j++) {
+				if(cells[i][j] != null) {
+					asciiPanel.write(i + xOffset, j + yOffset - (PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT), ' ', Color.WHITE, cells[i][j]);
+				}
+			}
+		}
+		
+		for(Point p : currentTetrimino.position[currentDirection]) {
+			if(p.y + currentPosition.y + yOffset - 2 > 1) {
+				asciiPanel.write(p.x+currentPosition.x+xOffset, p.y+currentPosition.y+yOffset - 2, ' ', Color.WHITE, currentTetrimino.color);
+			}
+		}
+		
+		
+		// NEXT TETROMINO
+		for(Point p : nextTetrimino.position[0]) {
+			asciiPanel.write(15+p.x, 10+p.y, ' ', Color.WHITE, nextTetrimino.color);
+		}
+	}
+	
+	public void pauseGame() {
+		
+	}
+	
+	public void GameOverGame() {
+		
+	}
+	
+	
+	
 	
 	public void newTetrimino() {
 		Tetrimino[] tetriminos = Tetrimino.values();
