@@ -37,6 +37,8 @@ public class AsciiTetris {
 	
 	private Random rand = new Random();
 	
+	private GameState gameState = GameState.MENU;
+	
 	private int score = 0;
 	private int level = 0;
 	private int scoreLevel = 0;
@@ -56,6 +58,8 @@ public class AsciiTetris {
 	private BitSet continueKeyEvents = new BitSet();
 	private double timerKeyEvent = 0d;
 	private double waitEvent = REPEAT_KEY_EVENT;
+	
+	private int menuPosition = 0;
 	
 	enum Tetrimino {
 		I(Color.CYAN, 4, new Point(3, 1), new Point[][]{
@@ -111,10 +115,12 @@ public class AsciiTetris {
 		}
 	}
 	
-	enum GAMESTATE {
+	enum GameState {
 		MENU,
+		LEADERBOARDS,
 		START,
 		PLAY,
+		PAUSE,
 		GAME_OVER;
 	}
 	
@@ -139,8 +145,6 @@ public class AsciiTetris {
 				continueKeyEvents.clear(e.getKeyCode());
 			}
 		});
-		
-		newTetrimino();
 	}
 	
 	public void run() {
@@ -196,9 +200,24 @@ public class AsciiTetris {
 				asciiPanel.write(19, 10+j, (char)179, color);
 			}
 			
-			
-			playGame(delta);
-			
+			if(gameState == GameState.MENU) {
+				menuGame();
+			}
+			else if(gameState == GameState.LEADERBOARDS) {
+				leaderboardsGame();
+			}
+			else if(gameState == GameState.START) {
+				startGame();
+			}
+			else if(gameState == GameState.PLAY) {
+				playGame(delta);
+			}
+			else if(gameState == GameState.PAUSE) {
+				pauseGame();
+			}
+			else if(gameState == GameState.GAME_OVER) {
+				gameOverGame();
+			}
 			
 			
 			asciiTerminal.repaint();
@@ -217,10 +236,71 @@ public class AsciiTetris {
 	}
 	
 	public void menuGame() {
+		if(event != null) {
+			if(event.getKeyCode() == KeyEvent.VK_ENTER) {
+				switch (menuPosition) {
+					case 0:
+						gameState = GameState.START;
+						break;
+						
+					case 1:
+						gameState = GameState.LEADERBOARDS;
+						break;
+						
+					case 2:
+						asciiTerminal.dispose();
+						System.exit(0);
+						break;
+			
+					default:
+						break;
+				}
+			}
+			
+			else if(event.getKeyCode() == KeyEvent.VK_UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 2;
+				}
+			}
+			else if(event.getKeyCode() == KeyEvent.VK_DOWN) {
+				menuPosition++;
+			}
+			
+			event = null;
+		}
+		
+		menuPosition %= 3;
+		
+		asciiPanel.writeString(5, 7, "MENU", Color.WHITE);
+		
+		asciiPanel.writeString(5, 9, "START", Color.GRAY);
+		asciiPanel.writeString(1, 10, "LEADERBOARDS", Color.GRAY);
+		asciiPanel.writeString(5, 11, "EXIT", Color.GRAY);
+		switch (menuPosition) {
+			case 0:
+				asciiPanel.writeString(5, 9, "START", Color.WHITE);
+				break;
+				
+			case 1:
+				asciiPanel.writeString(1, 10, "LEADERBOARDS", Color.WHITE);
+				break;
+				
+			case 2:
+				asciiPanel.writeString(5, 11, "EXIT", Color.WHITE);
+				break;
+	
+			default:
+				break;
+		}
+	}
+	
+	public void leaderboardsGame() {
 		
 	}
 	
-	public void initGame() {
+	public void startGame() {
+		menuPosition = 0;
 		score = 0;
 		level = 0;
 		scoreLevel = 0;
@@ -231,6 +311,10 @@ public class AsciiTetris {
 		nextTetrimino = null;
 		currentTetrimino = null;
 		countSameTetrimino = 0;
+		
+		newTetrimino();
+		
+		gameState = GameState.PLAY;
 	}
 	
 	public void playGame(double delta) {
@@ -249,6 +333,10 @@ public class AsciiTetris {
 						turnTetrimino(new Point(currentPosition.x + 1, currentPosition.y));
 					}
 				}
+			}
+			else if(event.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				gameState = GameState.PAUSE;
+				return;
 			}
 			
 			event = null;
@@ -428,14 +516,68 @@ public class AsciiTetris {
 	}
 	
 	public void pauseGame() {
+		if(event != null) {
+			if(event.getKeyCode() == KeyEvent.VK_ENTER) {
+				switch (menuPosition) {
+					case 0:
+						gameState = GameState.PLAY;
+						break;
+						
+					case 1:
+						gameState = GameState.MENU;
+						break;
+						
+					case 2:
+						asciiTerminal.dispose();
+						System.exit(0);
+						break;
+			
+					default:
+						break;
+				}
+			}
+			
+			else if(event.getKeyCode() == KeyEvent.VK_UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 2;
+				}
+			}
+			else if(event.getKeyCode() == KeyEvent.VK_DOWN) {
+				menuPosition++;
+			}
+			
+			event = null;
+		}
 		
+		menuPosition %= 3;
+		
+		asciiPanel.writeString(4, 7, "PAUSE", Color.WHITE);
+		
+		asciiPanel.writeString(3, 9, "CONTINUE", Color.GRAY);
+		asciiPanel.writeString(5, 10, "MENU", Color.GRAY);
+		asciiPanel.writeString(5, 11, "EXIT", Color.GRAY);
+		switch (menuPosition) {
+			case 0:
+				asciiPanel.writeString(3, 9, "CONTINUE", Color.WHITE);
+				break;
+				
+			case 1:
+				asciiPanel.writeString(5, 10, "MENU", Color.WHITE);
+				break;
+				
+			case 2:
+				asciiPanel.writeString(5, 11, "EXIT", Color.WHITE);
+				break;
+	
+			default:
+				break;
+		}
 	}
 	
-	public void GameOverGame() {
+	public void gameOverGame() {
 		
 	}
-	
-	
 	
 	
 	public void newTetrimino() {
