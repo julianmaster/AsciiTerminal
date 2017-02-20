@@ -326,11 +326,23 @@ public class AsciiTetris {
 		// KEY EVENT
 		if(event != null) {
 			if(event.getKeyCode() == KeyEvent.VK_UP) {
-				boolean turn = turnTetrimino(currentPosition);
-				if(!turn) {
-					turn = turnTetrimino(new Point(currentPosition.x - 1, currentPosition.y));
-					if(!turn) {
-						turnTetrimino(new Point(currentPosition.x + 1, currentPosition.y));
+				int nextDirection = (currentDirection + 1) % currentTetrimino.position.length;
+				
+				if(isFreeTetriminoPosition(currentPosition, nextDirection)) {
+					currentDirection = nextDirection;
+				}
+				else {
+					Point nextPosition = new Point(currentPosition.x - 1, currentPosition.y);
+					if(isFreeTetriminoPosition(nextPosition, nextDirection)) {
+						currentPosition = nextPosition;
+						currentDirection = nextDirection;
+					}
+					else {
+						nextPosition = new Point(currentPosition.x + 1, currentPosition.y);
+						if(isFreeTetriminoPosition(nextPosition, nextDirection)) {
+							currentPosition = nextPosition;
+							currentDirection = nextDirection;
+						}
 					}
 				}
 			}
@@ -357,11 +369,12 @@ public class AsciiTetris {
 			timerKeyEvent %= waitEvent;
 			waitEvent = 0;
 			
+			// If key just touch, need to wait a little more time for the next move for repeat action
 			if(instantKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
 				waitEvent = REPEAT_KEY_EVENT * 2;
 			}
 		
-			if(continueKeyEvents.get(KeyEvent.VK_LEFT) || instantKeyEvents.get(KeyEvent.VK_LEFT)) {
+			if(continueKeyEvents.get(KeyEvent.VK_LEFT)) {
 				instantKeyEvents.clear(KeyEvent.VK_LEFT);
 				
 				boolean goLeft = true;
@@ -381,7 +394,7 @@ public class AsciiTetris {
 					currentPosition.x -= 1;
 				}
 			}
-			if(continueKeyEvents.get(KeyEvent.VK_RIGHT) || instantKeyEvents.get(KeyEvent.VK_RIGHT)) {
+			if(continueKeyEvents.get(KeyEvent.VK_RIGHT)) {
 				instantKeyEvents.clear(KeyEvent.VK_RIGHT);
 				
 				boolean goRight = true;
@@ -401,7 +414,7 @@ public class AsciiTetris {
 					currentPosition.x += 1;
 				}
 			}
-			if(continueKeyEvents.get(KeyEvent.VK_DOWN) || instantKeyEvents.get(KeyEvent.VK_DOWN)) {
+			if(continueKeyEvents.get(KeyEvent.VK_DOWN)) {
 				instantKeyEvents.clear(KeyEvent.VK_DOWN);
 				softDrop = true;
 			}
@@ -474,6 +487,14 @@ public class AsciiTetris {
 				}
 				
 				scoring(fullLineCount);
+				
+				for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
+					for(y = 0; y < PLAYFIELD_HEIGHT-DISPLAY_PLAYFIELD_HEIGHT; y++) {
+						if(cells[x][y] != null) {
+							System.out.println("Game over");
+						}
+					}
+				}
 				
 				newTetrimino();
 			}
@@ -604,14 +625,21 @@ public class AsciiTetris {
 				change = false;
 			}
 		}while(change);
+		
 		currentDirection = 0;
-		currentPosition = (Point)currentTetrimino.startPosition.clone();
+		Point startPosition = (Point)currentTetrimino.startPosition.clone();
+		for(int i = currentTetrimino.startPosition.y; i >= 0; i--) {
+			startPosition.y = i;
+			if(isFreeTetriminoPosition(startPosition, currentDirection)) {
+				currentPosition = startPosition;
+				return;
+			}
+		}
 	}
 	
-	private boolean turnTetrimino(Point position) {
+	private boolean isFreeTetriminoPosition(Point position, int direction) {
 		boolean turn = true;
-		int nextDirection = (currentDirection + 1) % currentTetrimino.position.length;
-		for(Point p : currentTetrimino.position[nextDirection]) {
+		for(Point p : currentTetrimino.position[direction]) {
 			if(p.x + position.x >= 0 && p.x + position.x < PLAYFIELD_WIDTH && p.y + position.y >= 0 && p.y + position.y < PLAYFIELD_HEIGHT) {
 				Color color = cells[p.x + position.x][p.y + position.y];
 				if(color != null) {
@@ -625,11 +653,6 @@ public class AsciiTetris {
 			}
 		}
 		
-		if(turn) {
-			currentDirection = nextDirection;
-			currentPosition.x = position.x;
-		}
-		
 		return turn;
 	}
 	
@@ -638,7 +661,6 @@ public class AsciiTetris {
 	}
 	
 	private void scoring(int lines) {
-		System.out.println("Level: "+level+" - scoreLevel: "+scoreLevel+" - score: "+score);
 		if(lines == 1) {
 			score += 40 * (level + 1);
 			scoreLevel += 1;
@@ -655,7 +677,6 @@ public class AsciiTetris {
 			score += 1200 * (level + 1);
 			scoreLevel += 8;
 		}
-		System.out.println("Level: "+level+" - scoreLevel: "+scoreLevel+" - score: "+score);
 		
 		level = suiteScoreLevel(0, scoreLevel);
 	}
