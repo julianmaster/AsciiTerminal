@@ -6,7 +6,11 @@ import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+import java.util.prefs.Preferences;
 
 import ui.AsciiPanel;
 import ui.AsciiTerminal;
@@ -21,6 +25,8 @@ public class AsciiTetris {
 	public static final int CHARACTER_HEIGHT = 12;
 	public static final int TARGET_FPS = 60;
 	public static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
+	
+	public static final String SCORE_NAME_PATTERN = "SCORE-";
 	
 	public static final int PLAYFIELD_WIDTH = 10;
 	public static final int PLAYFIELD_HEIGHT = 22;
@@ -37,6 +43,8 @@ public class AsciiTetris {
 	
 	private Random rand = new Random();
 	
+	private Preferences preferences;
+	private List<Integer> scores = new LinkedList<>();
 	private GameState gameState = GameState.MENU;
 	
 	private int score = 0;
@@ -145,6 +153,11 @@ public class AsciiTetris {
 				continueKeyEvents.clear(e.getKeyCode());
 			}
 		});
+		
+		preferences = Preferences.userNodeForPackage(this.getClass());
+		for(int i = 0; i < 5; i++) {
+			scores.add(preferences.getInt(SCORE_NAME_PATTERN+"i", 0));
+		}
 	}
 	
 	public void run() {
@@ -492,6 +505,14 @@ public class AsciiTetris {
 					for(y = 0; y < PLAYFIELD_HEIGHT-DISPLAY_PLAYFIELD_HEIGHT; y++) {
 						if(cells[x][y] != null) {
 							System.out.println("Game over");
+							gameState = GameState.GAME_OVER;
+							
+							scores.add(score);
+							Collections.sort(scores, Collections.reverseOrder());
+							scores = scores.subList(0, 5);
+							for(int i = 0; i < 5; i++) {
+								preferences.putInt(SCORE_NAME_PATTERN+i, scores.get(i));
+							}
 						}
 					}
 				}
@@ -598,6 +619,64 @@ public class AsciiTetris {
 	
 	public void gameOverGame() {
 		
+		if(event != null) {
+			if(event.getKeyCode() == KeyEvent.VK_ENTER) {
+				switch (menuPosition) {
+					case 0:
+						gameState = GameState.START;
+						break;
+						
+					case 1:
+						gameState = GameState.MENU;
+						break;
+						
+					case 2:
+						asciiTerminal.dispose();
+						System.exit(0);
+						break;
+			
+					default:
+						break;
+				}
+			}
+			
+			else if(event.getKeyCode() == KeyEvent.VK_UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 2;
+				}
+			}
+			else if(event.getKeyCode() == KeyEvent.VK_DOWN) {
+				menuPosition++;
+			}
+			
+			event = null;
+		}
+		
+		asciiPanel.writeString(3, 7, "GAME OVER", Color.WHITE);
+		
+		asciiPanel.writeString(4, 9, "SCORE", Color.GRAY);
+		asciiPanel.writeString(4, 10, String.format("%06d", score), Color.CYAN);
+
+		asciiPanel.writeString(4, 12, "RETRY", Color.GRAY);
+		asciiPanel.writeString(5, 13, "MENU", Color.GRAY);
+		asciiPanel.writeString(5, 14, "EXIT", Color.GRAY);
+		switch (menuPosition) {
+			case 0:
+				asciiPanel.writeString(4, 12, "RETRY", Color.WHITE);
+				break;
+				
+			case 1:
+				asciiPanel.writeString(5, 13, "MENU", Color.WHITE);
+				break;
+				
+			case 2:
+				asciiPanel.writeString(5, 14, "EXIT", Color.WHITE);
+				break;
+	
+			default:
+				break;
+		}
 	}
 	
 	
