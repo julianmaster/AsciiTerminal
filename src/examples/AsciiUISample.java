@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
 
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 import ui.AsciiPanel;
@@ -18,7 +19,6 @@ public class AsciiUISample {
 	public static final String TITLE = "ASCII Demo";
 	public static final int WINDOW_WIDTH = 16;
 	public static final int WINDOW_HEIGHT = 16;
-	public static final int SCALE = 3;
 	
 	private final AsciiTerminal terminal;
 	
@@ -57,27 +57,35 @@ public class AsciiUISample {
 	}
 	
 	public static void main(String[] args) {
-		String[] choices = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
+		String[] choiceTileset = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
+		JComboBox<String> comboChoiceTileset = new JComboBox<>(choiceTileset);
+		
+		String[] choiceScale = { "Small", "Medium", "Large"};
+		JComboBox<String> comboChoiceScale = new JComboBox<>(choiceScale);
+		comboChoiceScale.setSelectedItem("Medium");
+		Object[] choices = {
+				"Tileset:", comboChoiceTileset,
+				"Scale:", comboChoiceScale
+		};
 	    
-		String input = (String) JOptionPane.showInputDialog(null, "Choose tilset...",
-	        "Choice of tileset", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
-	    
-		if(input != null) {
-			if(input.equals("Anikki [8x8]")) {
-				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8, SCALE ,true);
+		int option = JOptionPane.showConfirmDialog(null, choices, "Configurations", JOptionPane.OK_CANCEL_OPTION);
+	    if(option == JOptionPane.OK_OPTION) {
+	    	int scale = comboChoiceScale.getSelectedIndex()+1;
+	    	if(comboChoiceTileset.getSelectedItem().equals("Anikki [8x8]")) {
+				new AsciiUISample("/assets/Anikki_square_8x8.png", 8, 8, scale, true);
 			}
-			else if(input.equals("Yoshis island [9x12]")) {
-				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12, SCALE ,true);
+			else if(comboChoiceTileset.getSelectedItem().equals("Yoshis island [9x12]")) {
+				new AsciiUISample("/assets/Yoshis_island_9x12.png", 9, 12, scale, true);
 			}
-			else if(input.equals("Vidumec [15x15]")) {
-				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15, SCALE ,true);
+			else if(comboChoiceTileset.getSelectedItem().equals("Vidumec [15x15]")) {
+				new AsciiUISample("/assets/Vidumec_15x15.png", 15, 15, scale, true);
 			}
-			else if(input.equals("Wanderlust [16x16]")) {
-				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16, SCALE ,true);
+			else if(comboChoiceTileset.getSelectedItem().equals("Wanderlust [16x16]")) {
+				new AsciiUISample("/assets/wanderlust_16x16.png", 16, 16, scale, true);
 			}
 			else {
-				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24, SCALE ,true);
+				new AsciiUISample("/assets/Curses_square_24x24.png", 24, 24, scale, true);
 			}
-		}
+	    }
 	}
 }

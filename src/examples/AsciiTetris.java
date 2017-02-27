@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 import ui.AsciiPanel;
@@ -29,16 +30,13 @@ class Leaderboards implements Serializable {
 public class AsciiTetris {
 	public static final int WINDOW_WIDTH = 21;
 	public static final int WINDOW_HEIGHT = 24;
-	public static final int SCALE = 3;
 	public static final boolean CUSTOM_WINDOW = true;
-	public static final String TILESET = "/assets/Yoshis_island_9x12.png";
-	public static final int CHARACTER_WIDTH = 9;
-	public static final int CHARACTER_HEIGHT = 12;
 	public static final int TARGET_FPS = 60;
 	public static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 	
 	public static final String LEADERBOARD_SAVE_FILE = "saveAsciiTetris.bin";
 	
+	public static final char BLOC_TILE = 0;
 	public static final int PLAYFIELD_WIDTH = 10;
 	public static final int PLAYFIELD_HEIGHT = 22;
 	public static final int DISPLAY_PLAYFIELD_HEIGHT = 20;
@@ -142,8 +140,8 @@ public class AsciiTetris {
 		GAME_OVER;
 	}
 	
-	public AsciiTetris() throws Exception {
-		asciiTerminal = new AsciiTerminal("AsciiTetris", new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), TILESET, CHARACTER_WIDTH, CHARACTER_HEIGHT, SCALE, CUSTOM_WINDOW);
+	public AsciiTetris(String tileset, int characterWidth, int characterHeight, int scale) throws Exception {
+		asciiTerminal = new AsciiTerminal("AsciiTetris", new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), tileset, characterWidth, characterHeight, scale, CUSTOM_WINDOW);
 		asciiPanel = asciiTerminal.getAsciiPanel();
 		
 		asciiTerminal.addKeyListener(new KeyAdapter() {
@@ -607,7 +605,7 @@ public class AsciiTetris {
 		for(int i = 0; i < PLAYFIELD_WIDTH; i++) {
 			for(int j = PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT; j < PLAYFIELD_HEIGHT; j++) {
 				if(cells[i][j] != null) {
-					asciiPanel.write(i + xOffset, j + yOffset - (PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT), ' ', Color.WHITE, cells[i][j]);
+					asciiPanel.write(i + xOffset, j + yOffset - (PLAYFIELD_HEIGHT - DISPLAY_PLAYFIELD_HEIGHT), BLOC_TILE, Color.WHITE, cells[i][j]);
 				}
 			}
 		}
@@ -616,20 +614,20 @@ public class AsciiTetris {
 		Color shadowColor = new Color(currentTetrimino.color.getRed()/2, currentTetrimino.color.getGreen()/2, currentTetrimino.color.getBlue()/2);
 		for(Point p : currentTetrimino.position[currentDirection]) {
 			if(p.y + currentPosition.y + yOffset - 2 > 1) {
-				asciiPanel.write(p.x+shadowPosition.x+xOffset, p.y+shadowPosition.y+yOffset - 2, ' ', Color.WHITE, shadowColor);
+				asciiPanel.write(p.x+shadowPosition.x+xOffset, p.y+shadowPosition.y+yOffset - 2, BLOC_TILE, Color.WHITE, shadowColor);
 			}
 		}
 		
 		// TETRIMINO
 		for(Point p : currentTetrimino.position[currentDirection]) {
 			if(p.y + currentPosition.y + yOffset - 2 > 1) {
-				asciiPanel.write(p.x+currentPosition.x+xOffset, p.y+currentPosition.y+yOffset - 2, ' ', Color.WHITE, currentTetrimino.color);
+				asciiPanel.write(p.x+currentPosition.x+xOffset, p.y+currentPosition.y+yOffset - 2, BLOC_TILE, Color.WHITE, currentTetrimino.color);
 			}
 		}
 		
 		// NEXT TETROMINO
 		for(Point p : nextTetrimino.position[0]) {
-			asciiPanel.write(15+p.x, 10+p.y, ' ', Color.WHITE, nextTetrimino.color);
+			asciiPanel.write(15+p.x, 10+p.y, BLOC_TILE, Color.WHITE, nextTetrimino.color);
 		}
 		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ESC:PAUSE", Color.GREEN);
 	}
@@ -849,7 +847,36 @@ public class AsciiTetris {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		AsciiTetris asciiTetris = new AsciiTetris();
-		asciiTetris.run();
+		
+		String[] choiceTileset = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
+		JComboBox<String> comboChoiceTileset = new JComboBox<>(choiceTileset);
+		
+		String[] choiceScale = { "Small", "Medium", "Large"};
+		JComboBox<String> comboChoiceScale = new JComboBox<>(choiceScale);
+		comboChoiceScale.setSelectedItem("Medium");
+		Object[] choices = {
+				"Tileset:", comboChoiceTileset,
+				"Scale:", comboChoiceScale
+		};
+		
+		int option = JOptionPane.showConfirmDialog(null, choices, "Configurations", JOptionPane.OK_CANCEL_OPTION);
+	    if(option == JOptionPane.OK_OPTION) {
+	    	int scale = comboChoiceScale.getSelectedIndex()+1;
+	    	if(comboChoiceTileset.getSelectedItem().equals("Anikki [8x8]")) {
+	    		new AsciiTetris("/assets/Anikki_square_8x8.png", 8, 8, scale).run();
+			}
+			else if(comboChoiceTileset.getSelectedItem().equals("Yoshis island [9x12]")) {
+				new AsciiTetris("/assets/Yoshis_island_9x12.png", 9, 12, scale).run();
+			}
+			else if(comboChoiceTileset.getSelectedItem().equals("Vidumec [15x15]")) {
+				new AsciiTetris("/assets/Vidumec_15x15.png", 15, 15, scale).run();
+			}
+			else if(comboChoiceTileset.getSelectedItem().equals("Wanderlust [16x16]")) {
+				new AsciiTetris("/assets/wanderlust_16x16.png", 16, 16, scale).run();
+			}
+			else {
+				new AsciiTetris("/assets/Curses_square_24x24.png", 24, 24, scale).run();
+			}
+	    }
 	}
 }
