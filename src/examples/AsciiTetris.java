@@ -5,15 +5,26 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
-import java.util.prefs.Preferences;
+
+import javax.swing.JOptionPane;
 
 import ui.AsciiPanel;
 import ui.AsciiTerminal;
+
+class Leaderboards implements Serializable {
+	private static final long serialVersionUID = 2274204318785895973L;
+	public LinkedList<Integer> scores = new LinkedList<>();
+}
 
 public class AsciiTetris {
 	public static final int WINDOW_WIDTH = 21;
@@ -26,7 +37,6 @@ public class AsciiTetris {
 	public static final int TARGET_FPS = 60;
 	public static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 	
-	public static final String SCORE_NAME_PATTERN = "SCORE-";
 	
 	public static final int PLAYFIELD_WIDTH = 10;
 	public static final int PLAYFIELD_HEIGHT = 22;
@@ -43,8 +53,7 @@ public class AsciiTetris {
 	
 	private Random rand = new Random();
 	
-	private Preferences preferences;
-	private List<Integer> scores = new LinkedList<>();
+	private Leaderboards leaderboards = new Leaderboards();
 	private GameState gameState = GameState.MENU;
 	
 	private int score = 0;
@@ -132,9 +141,7 @@ public class AsciiTetris {
 		GAME_OVER;
 	}
 	
-	
-	
-	public AsciiTetris() {
+	public AsciiTetris() throws Exception {
 		asciiTerminal = new AsciiTerminal("AsciiTetris", new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), TILESET, CHARACTER_WIDTH, CHARACTER_HEIGHT, SCALE, CUSTOM_WINDOW);
 		asciiPanel = asciiTerminal.getAsciiPanel();
 		
@@ -154,13 +161,37 @@ public class AsciiTetris {
 			}
 		});
 		
-		preferences = Preferences.userNodeForPackage(this.getClass());
-		for(int i = 0; i < 5; i++) {
-			scores.add(preferences.getInt(SCORE_NAME_PATTERN+"i", 0));
+		loadLeaderboards();
+	}
+	
+	public void loadLeaderboards() throws Exception {
+		File file = new File(LEADERBOARD_SAVE_FILE);
+		if(file.exists() && file.canRead()) {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+			leaderboards = (Leaderboards)ois.readObject();
+			ois.close();
+		}
+		else if(file.exists() && !file.canWrite()) {
+			JOptionPane.showMessageDialog(asciiTerminal, "Unable to load save file. You don't have persmision to load it.", "AsciiTetris Message", JOptionPane.ERROR_MESSAGE);
+		}
+		else {
+			for(int i = 0; i < 5; i++) {
+				leaderboards.scores.add(0);
+				saveLeaderboards();
+			}
 		}
 	}
 	
-	public void run() {
+	public void saveLeaderboards() throws Exception {
+		File file = new File(LEADERBOARD_SAVE_FILE);
+		if(file.exists() && file.canWrite() || !file.exists()) {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(leaderboards);
+			out.close();
+		}
+	}
+	
+	public void run() throws Exception {
 		long lastLoopTime = System.nanoTime();
 		
 		while(true) {
@@ -306,10 +337,26 @@ public class AsciiTetris {
 			default:
 				break;
 		}
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 	}
 	
 	public void leaderboardsGame() {
+		if(event != null) {
+			if(event.getKeyCode() == KeyEvent.VK_ESCAPE) {
+				gameState = GameState.MENU;
+			}
+			
+			event = null;
+		}
 		
+		
+		asciiPanel.writeString(1, 6, "LEADERBOARDS", Color.WHITE);
+		for(int i = 0; i < 5; i++) {
+			asciiPanel.writeString(2, 8+i, (i+1)+".", Color.WHITE);
+			String value = leaderboards.scores.get(i).toString();
+			asciiPanel.writeString(12-value.length(), 8+i, value, Color.WHITE);
+		}
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ESC:MENU", Color.GREEN);
 	}
 	
 	public void startGame() {
@@ -330,7 +377,7 @@ public class AsciiTetris {
 		gameState = GameState.PLAY;
 	}
 	
-	public void playGame(double delta) {
+	public void playGame(double delta) throws Exception {
 		/**
 		 * UPDATE
 		 */
@@ -501,18 +548,18 @@ public class AsciiTetris {
 				
 				scoring(fullLineCount);
 				
+				// Test if game over
 				for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
 					for(y = 0; y < PLAYFIELD_HEIGHT-DISPLAY_PLAYFIELD_HEIGHT; y++) {
 						if(cells[x][y] != null) {
-							System.out.println("Game over");
 							gameState = GameState.GAME_OVER;
 							
-							scores.add(score);
-							Collections.sort(scores, Collections.reverseOrder());
-							scores = scores.subList(0, 5);
-							for(int i = 0; i < 5; i++) {
-								preferences.putInt(SCORE_NAME_PATTERN+i, scores.get(i));
-							}
+							leaderboards.scores.add(score);
+							Collections.sort(leaderboards.scores, Collections.reverseOrder());
+							leaderboards.scores = new LinkedList<>(leaderboards.scores.subList(0, 5));
+							
+							saveLeaderboards();
+							return;
 						}
 					}
 				}
@@ -520,6 +567,26 @@ public class AsciiTetris {
 				newTetrimino();
 			}
 		}
+		
+		// Find the shadow tetrimino position
+		boolean isShadowPosition = false;
+		Point shadowPosition = new Point(currentPosition);
+		do {
+			for(Point p : currentTetrimino.position[currentDirection]) {
+				if(p.y + shadowPosition.y + 1 >= PLAYFIELD_HEIGHT) {
+					isShadowPosition = true;
+					break;
+				}
+				Color color = cells[p.x + shadowPosition.x][p.y + shadowPosition.y + 1];
+				if(color != null) {
+					isShadowPosition = true;
+					break;
+				}
+			}
+			if(!isShadowPosition) {
+				shadowPosition = new Point(shadowPosition.x, shadowPosition.y+1);
+			}
+		}while(!isShadowPosition);
 		
 		
 		
@@ -544,17 +611,26 @@ public class AsciiTetris {
 			}
 		}
 		
+		// SHADOW TETRIMINO
+		Color shadowColor = new Color(currentTetrimino.color.getRed()/2, currentTetrimino.color.getGreen()/2, currentTetrimino.color.getBlue()/2);
+		for(Point p : currentTetrimino.position[currentDirection]) {
+			if(p.y + currentPosition.y + yOffset - 2 > 1) {
+				asciiPanel.write(p.x+shadowPosition.x+xOffset, p.y+shadowPosition.y+yOffset - 2, ' ', Color.WHITE, shadowColor);
+			}
+		}
+		
+		// TETRIMINO
 		for(Point p : currentTetrimino.position[currentDirection]) {
 			if(p.y + currentPosition.y + yOffset - 2 > 1) {
 				asciiPanel.write(p.x+currentPosition.x+xOffset, p.y+currentPosition.y+yOffset - 2, ' ', Color.WHITE, currentTetrimino.color);
 			}
 		}
 		
-		
 		// NEXT TETROMINO
 		for(Point p : nextTetrimino.position[0]) {
 			asciiPanel.write(15+p.x, 10+p.y, ' ', Color.WHITE, nextTetrimino.color);
 		}
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ESC:PAUSE", Color.GREEN);
 	}
 	
 	public void pauseGame() {
@@ -618,7 +694,7 @@ public class AsciiTetris {
 	}
 	
 	public void gameOverGame() {
-		
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 		if(event != null) {
 			if(event.getKeyCode() == KeyEvent.VK_ENTER) {
 				switch (menuPosition) {
@@ -653,6 +729,8 @@ public class AsciiTetris {
 			event = null;
 		}
 		
+		menuPosition %= 3;
+		
 		asciiPanel.writeString(3, 7, "GAME OVER", Color.WHITE);
 		
 		asciiPanel.writeString(4, 9, "SCORE", Color.GRAY);
@@ -673,7 +751,7 @@ public class AsciiTetris {
 			case 2:
 				asciiPanel.writeString(5, 14, "EXIT", Color.WHITE);
 				break;
-	
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 			default:
 				break;
 		}
@@ -769,7 +847,7 @@ public class AsciiTetris {
 		}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		AsciiTetris asciiTetris = new AsciiTetris();
 		asciiTetris.run();
 	}
