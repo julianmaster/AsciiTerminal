@@ -37,6 +37,7 @@ public class AsciiTetris {
 	public static final int TARGET_FPS = 60;
 	public static final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
 	
+	public static final String LEADERBOARD_SAVE_FILE = "saveAsciiTetris.bin";
 	
 	public static final int PLAYFIELD_WIDTH = 10;
 	public static final int PLAYFIELD_HEIGHT = 22;
@@ -313,8 +314,8 @@ public class AsciiTetris {
 			
 			event = null;
 		}
-		
 		menuPosition %= 3;
+		
 		
 		asciiPanel.writeString(5, 7, "MENU", Color.WHITE);
 		
@@ -691,10 +692,10 @@ public class AsciiTetris {
 			default:
 				break;
 		}
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 	}
 	
 	public void gameOverGame() {
-		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 		if(event != null) {
 			if(event.getKeyCode() == KeyEvent.VK_ENTER) {
 				switch (menuPosition) {
@@ -751,12 +752,12 @@ public class AsciiTetris {
 			case 2:
 				asciiPanel.writeString(5, 14, "EXIT", Color.WHITE);
 				break;
-		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
+	
 			default:
 				break;
 		}
+		asciiPanel.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
 	}
-	
 	
 	public void newTetrimino() {
 		Tetrimino[] tetriminos = Tetrimino.values();
