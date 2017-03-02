@@ -847,7 +847,6 @@ public class AsciiTetris {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		
 		String[] choiceTileset = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
 		JComboBox<String> comboChoiceTileset = new JComboBox<>(choiceTileset);
 		

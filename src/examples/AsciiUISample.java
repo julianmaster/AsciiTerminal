@@ -1,6 +1,7 @@
 package examples;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,6 +36,7 @@ public class AsciiUISample {
 		}
 		
 		AsciiTerminalButton button1 = new AsciiTerminalButton(asciiPanel, "Clik on me !", 0, 12, Color.GREEN, Color.ORANGE);
+		button1.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		button1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -44,6 +46,7 @@ public class AsciiUISample {
 		asciiPanel.add(button1);
 		
 		AsciiSelectableTerminalButton button2 = new AsciiSelectableTerminalButton(asciiPanel, "Select me !", 0, 14, Color.GREEN, Color.ORANGE, Color.MAGENTA);
+		button2.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		button2.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {

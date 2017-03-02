@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
@@ -32,7 +33,7 @@ public class AsciiPanel extends JPanel {
     private AsciiTerminalDataCell[][] terminal;
     private AsciiTerminalDataCell[][] oldTerminal;
     private Image image;
-    private Graphics graphics;
+    private Graphics2D graphics;
     private int scale;
 
     public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight) {
@@ -173,20 +174,18 @@ public class AsciiPanel extends JPanel {
             for(int j = x; j < x + width; j++){
                 AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
                 terminal[i][j] = tdc;
-                oldTerminal[i][j] = tdc;
             }
-        }
-        if(graphics != null) {
-        	graphics.setColor(defaultCharacterBackgroundColor);
-            graphics.fillRect(x * characterSize.width * scale, y * characterSize.height * scale, width * characterSize.width * scale, height * characterSize.height * scale);
         }
     }
 
     @Override
-    public void paint(Graphics g) {
+    protected void paintComponent(Graphics g) {
+    	super.paintComponent(g);
+    	Graphics2D g2d = (Graphics2D)g.create();
+    	
 		if(image == null) {
 			image = this.createImage(this.getPreferredSize().width, this.getPreferredSize().height);
-            graphics = image.getGraphics();
+            graphics = (Graphics2D)image.getGraphics();
             graphics.setColor(defaultCharacterBackgroundColor);
             graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
     	}
@@ -212,7 +211,8 @@ public class AsciiPanel extends JPanel {
             }
         }
 
-        g.drawImage(image, 0, 0, this);
+        g2d.drawImage(image, 0, 0, this);
+        g2d.dispose();
     }
 
     private LookupOp setColorCharacter(Color bgColor, Color fgColor){
