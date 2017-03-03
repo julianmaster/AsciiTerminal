@@ -172,7 +172,7 @@ public class AsciiPanel extends JPanel {
         }
         for(int i = y; i < y + height; i++){
             for(int j = x; j < x + width; j++){
-                AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
+                AsciiTerminalDataCell tdc = new AsciiTerminalDataCell((char)0, defaultCharacterColor, defaultCharacterBackgroundColor);
                 terminal[i][j] = tdc;
             }
         }
@@ -189,11 +189,11 @@ public class AsciiPanel extends JPanel {
             graphics.setColor(defaultCharacterBackgroundColor);
             graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
     	}
+		
+		for(Component component : getComponents()) {
+			component.paint(graphics);
+		}
     	
-        for(Component component : getComponents()) {
-        	component.paint(graphics);
-        }
-
         for(int i = 0; i < size.height; i++){
             for(int j = 0; j < size.width; j++){
                 if(     terminal[i][j].data == oldTerminal[i][j].data &&
@@ -210,7 +210,7 @@ public class AsciiPanel extends JPanel {
                 oldTerminal[i][j].backgroundColor = terminal[i][j].backgroundColor;
             }
         }
-
+        
         g2d.drawImage(image, 0, 0, this);
         g2d.dispose();
     }
