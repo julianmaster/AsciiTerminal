@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.LookupOp;
@@ -16,7 +17,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.RepaintManager;
 
 /**
  * JPanel with a ASCII render system
@@ -172,17 +175,22 @@ public class AsciiPanel extends JPanel {
         }
         for(int i = y; i < y + height; i++){
             for(int j = x; j < x + width; j++){
-                AsciiTerminalDataCell tdc = new AsciiTerminalDataCell((char)0, defaultCharacterColor, defaultCharacterBackgroundColor);
-                terminal[i][j] = tdc;
+//                AsciiTerminalDataCell tdc = new AsciiTerminalDataCell((char)0, defaultCharacterColor, defaultCharacterBackgroundColor);
+                terminal[i][j].data = 0;
+                terminal[i][j].dataColor = defaultCharacterColor;
+                terminal[i][j].backgroundColor = defaultCharacterBackgroundColor;
+//                terminal[i][j] = tdc;
             }
         }
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-    	super.paintComponent(g);
-    	Graphics2D g2d = (Graphics2D)g.create();
-    	
+    public void paint(Graphics g) {
+        super.paint(g);
+        postPaint(g);
+    }
+    
+    public void postPaint(Graphics g) {
 		if(image == null) {
 			image = this.createImage(this.getPreferredSize().width, this.getPreferredSize().height);
             graphics = (Graphics2D)image.getGraphics();
@@ -190,9 +198,9 @@ public class AsciiPanel extends JPanel {
             graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
     	}
 		
-		for(Component component : getComponents()) {
-			component.paint(graphics);
-		}
+//		for(Component component : getComponents()) {
+//			component.paint(graphics);
+//		}
     	
         for(int i = 0; i < size.height; i++){
             for(int j = 0; j < size.width; j++){
@@ -210,9 +218,8 @@ public class AsciiPanel extends JPanel {
                 oldTerminal[i][j].backgroundColor = terminal[i][j].backgroundColor;
             }
         }
-        
-        g2d.drawImage(image, 0, 0, this);
-        g2d.dispose();
+        g.drawImage(image, 0, 0, this);
+        g.dispose();
     }
 
     private LookupOp setColorCharacter(Color bgColor, Color fgColor){
