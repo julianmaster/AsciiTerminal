@@ -82,7 +82,6 @@ public class AsciiTerminalButton extends JComponent implements MouseListener {
     protected void paintComponent(Graphics g) {
     	super.paintComponent(g);
 		asciiPanel.writeString(x, y, name, mouseCurrentColor, mouseBackgroundColor != null ? mouseBackgroundColor : asciiPanel.getDefaultCharacterBackgroundColor());
-//		asciiPanel.repaint();
 	}
 	
 	@Override
