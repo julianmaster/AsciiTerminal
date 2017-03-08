@@ -38,7 +38,6 @@ public class AsciiPanel extends JPanel {
     private Image image;
     private Graphics2D graphics;
     private int scale;
-    private boolean repaintAsk = false;
 
     public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight) {
     	this(dimension, tilesetFile, characterWidth, characterHeight, 1);
@@ -55,9 +54,8 @@ public class AsciiPanel extends JPanel {
         oldTerminal = new AsciiTerminalDataCell[size.height][size.width];
         for(int i = 0; i < size.height; i++){
             for(int j = 0; j < size.width; j++){
-                AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
-                terminal[i][j] = tdc;
-                oldTerminal[i][j] = tdc;
+                terminal[i][j] = new AsciiTerminalDataCell();
+                oldTerminal[i][j] = new AsciiTerminalDataCell();
             }
         }
 
@@ -98,30 +96,24 @@ public class AsciiPanel extends JPanel {
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor){
-        AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
-        tdc.data = character;
-        tdc.dataColor = characterColor;
-        tdc.backgroundColor = defaultCharacterBackgroundColor;
-        this.write(positionX, positionY, tdc);
+        this.write(positionX, positionY, character, characterColor, defaultCharacterBackgroundColor);
+    }
+    
+    public void write(int positionX, int positionY, AsciiTerminalDataCell character){
+        this.write(positionX, positionY, character.data, character.dataColor, character.backgroundColor);
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor, Color characterBackgroundColor){
-        AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
-        tdc.data = character;
-        tdc.dataColor =characterColor;
-        tdc.backgroundColor = characterBackgroundColor;
-        this.write(positionX, positionY, tdc);
-    }
-
-    public void write(int positionX, int positionY, AsciiTerminalDataCell character){
         if(positionX < 0 || positionX > size.width - 1){
             throw new IllegalArgumentException("X position between [0 and "+size.width+"]");
         }
         if(positionY < 0 || positionY > size.height - 1){
             throw new IllegalArgumentException("Y position between [0 and "+size.height+"]");
         }
-
-        terminal[positionY][positionX] = character;
+        
+        terminal[positionY][positionX].data = character;
+        terminal[positionY][positionX].dataColor = characterColor;
+        terminal[positionY][positionX].backgroundColor = characterBackgroundColor;
     }
 
     public void writeString(int positionX, int positionY, String string, Color characterColor){
@@ -130,18 +122,7 @@ public class AsciiPanel extends JPanel {
 
     public void writeString(int positionX, int positionY, String string, Color characterColor, Color characterBackgroundColor){
         for(char c : string.toCharArray()){
-            if(positionX < 0 || positionX > size.width - 1){
-                throw new IllegalArgumentException("X position between [0 and "+size.width+"]");
-            }
-            if(positionY < 0 || positionY > size.height - 1){
-                throw new IllegalArgumentException("Y position between [0 and "+size.height+"]");
-            }
-
-            AsciiTerminalDataCell tdc = new AsciiTerminalDataCell();
-            tdc.data = c;
-            tdc.dataColor = characterColor;
-            tdc.backgroundColor = characterBackgroundColor;
-            write(positionX, positionY, tdc);
+            this.write(positionX, positionY, c, characterColor, characterBackgroundColor);
             positionX++;
         }
     }
@@ -176,62 +157,42 @@ public class AsciiPanel extends JPanel {
         }
         for(int i = y; i < y + height; i++){
             for(int j = x; j < x + width; j++) {
-            	terminal[i][j] = new AsciiTerminalDataCell((char)0, defaultCharacterColor, defaultCharacterBackgroundColor);
+            	write(j, i, (char)0, defaultCharacterColor, defaultCharacterBackgroundColor);
             }
         }
     }
     
     @Override
-    public void repaint() {
-    	super.repaint();
-    	System.out.println("Repaint");
-    	repaintAsk = true;
-    }
-    
-    @Override
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
     	super.paintComponent(g);
-    	System.out.println("PaintComponent");
-    }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        System.out.println("Paint");
-        postPaint(g);
-    }
-    
-    public void postPaint(Graphics g) {
-    	if(image == null) {
+        if(image == null) {
 			image = this.createImage(this.getPreferredSize().width, this.getPreferredSize().height);
             graphics = (Graphics2D)image.getGraphics();
             graphics.setColor(defaultCharacterBackgroundColor);
             graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
     	}
+        
+        for(Component component : getComponents()) {
+        	component.paint(graphics);
+        }
 		
-    	if(repaintAsk) {
-    		repaintAsk = false;
-    		for(int i = 0; i < size.height; i++){
-                for(int j = 0; j < size.width; j++){
-                    if(     terminal[i][j].data == oldTerminal[i][j].data &&
-                            terminal[i][j].dataColor.equals(oldTerminal[i][j].dataColor) &&
-                            terminal[i][j].backgroundColor.equals(oldTerminal[i][j].backgroundColor)) {
-                        continue;
-                    }
-
-                    LookupOp lookupOp = setColorCharacter(terminal[i][j].backgroundColor, terminal[i][j].dataColor);
-                    graphics.drawImage(lookupOp.filter(character[terminal[i][j].data], null), j*characterSize.width*scale, i*characterSize.height*scale, characterSize.width*scale, characterSize.height*scale, this);
-
-                    
-                    oldTerminal[i][j] = terminal[i][j];
-//                    oldTerminal[i][j].data = terminal[i][j].data;
-//                    oldTerminal[i][j].dataColor = terminal[i][j].dataColor;
-//                    oldTerminal[i][j].backgroundColor = terminal[i][j].backgroundColor;
+		for(int i = 0; i < size.height; i++){
+            for(int j = 0; j < size.width; j++){
+                if(     terminal[i][j].data == oldTerminal[i][j].data &&
+                        terminal[i][j].dataColor.equals(oldTerminal[i][j].dataColor) &&
+                        terminal[i][j].backgroundColor.equals(oldTerminal[i][j].backgroundColor)) {
+                    continue;
                 }
+
+                LookupOp lookupOp = setColorCharacter(terminal[i][j].backgroundColor, terminal[i][j].dataColor);
+                graphics.drawImage(lookupOp.filter(character[terminal[i][j].data], null), j*characterSize.width*scale, i*characterSize.height*scale, characterSize.width*scale, characterSize.height*scale, this);
+
+                oldTerminal[i][j].data = terminal[i][j].data;
+                oldTerminal[i][j].dataColor = terminal[i][j].dataColor;
+                oldTerminal[i][j].backgroundColor = terminal[i][j].backgroundColor;
             }
-            g.drawImage(image, 0, 0, this);
-    	}
-    	g.dispose();
+        }
+    	g.drawImage(image, 0, 0, this);
     }
 
     private LookupOp setColorCharacter(Color bgColor, Color fgColor){
@@ -322,7 +283,12 @@ public class AsciiPanel extends JPanel {
     public Dimension getCharacterSize() {
 		return characterSize;
 	}
+    
     public int getScale() {
 		return scale;
 	}
+    
+    public AsciiTerminalDataCell getCell(int x, int y) {
+    	return terminal[y][x];
+    }
 }

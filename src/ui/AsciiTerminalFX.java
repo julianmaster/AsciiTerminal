@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -21,7 +22,15 @@ public class AsciiTerminalFX extends Application {
 	
 	private int width;
 	private int height;
+	private int characterWidth;
+	private int characterheight;
 	
+	public AsciiTerminalFX(int width, int height, int characterWidth, int characterheight) {
+		this.width = width;
+		this.height = height;
+		this.characterWidth = characterWidth;
+		this.characterheight = characterheight;
+	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -31,32 +40,23 @@ public class AsciiTerminalFX extends Application {
 		Scene scene = new Scene(root);
 		stage.setScene(scene);
 		
-//	    Image earth = new Image(new FileInputStream("earth.png"));
-//	    Image sun   = new Image(new FileInputStream("sun.png"));
-//	    Image space = new Image(new FileInputStream("space.png"));
-//	    
-//	    final long startNanoTime = System.nanoTime();
-//	    
-//	    new AnimationTimer()
-//	    {
-//	        public void handle(long currentNanoTime)
-//	        {
-//	            double t = (currentNanoTime - startNanoTime) / 1000000000.0; 
-//	 
-//	            double x = 232 + 128 * Math.cos(t);
-//	            double y = 232 + 128 * Math.sin(t);
-//	 
-//	            // background image clears canvas
-//	            gc.drawImage( space, 0, 0 );
-//	            gc.drawImage( earth, x, y );
-//	            gc.drawImage( sun, 196, 196 );
-//	        }
-//	    }.start();
-	    
-	    
 	    Image image = new Image(new FileInputStream("src/assets/wanderlust_16x16.png"));
 	    
 	    ImageView modified = new ImageView(createImage(image));
+	    
+	    
+	    System.out.println(width);
+	    
+	    
+	    
+	    GridPane gridPane = new GridPane();
+	    
+//	    gridPane.add(modified, columnIndex, rowIndex);
+	    
+	    
+	    
+	    
+	    
 	    
 	    root.getChildren().add(modified);
 	    
@@ -90,6 +90,9 @@ public class AsciiTerminalFX extends Application {
 			}
 		}
 		
+		
+		
+		
 		return writableImage;
 	}
 	
@@ -98,6 +101,7 @@ public class AsciiTerminalFX extends Application {
    }
 
 	public static void main(String[] args) {
-		AsciiTerminalFX.launch(args);
+//		AsciiTerminalFX.launch(args);
+		new AsciiTerminalFX(5, 5, 16, 16).launch(args);
 	}
 }

@@ -144,7 +144,7 @@ public class AsciiTetris {
 		asciiTerminal = new AsciiTerminal("AsciiTetris", new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT), tileset, characterWidth, characterHeight, scale, CUSTOM_WINDOW);
 		asciiPanel = asciiTerminal.getAsciiPanel();
 		
-		asciiPanel.setDefaultCharacterBackgroundColor(Color.LIGHT_GRAY);
+//		asciiPanel.setDefaultCharacterBackgroundColor(Color.LIGHT_GRAY);
 		
 		asciiTerminal.addKeyListener(new KeyAdapter() {
 			@Override
@@ -263,7 +263,6 @@ public class AsciiTetris {
 			else if(gameState == GameState.GAME_OVER) {
 				gameOverGame();
 			}
-			
 			
 			asciiTerminal.repaint();
 			

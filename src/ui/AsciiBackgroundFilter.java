@@ -28,7 +28,6 @@ public class AsciiBackgroundFilter extends RGBImageFilter {
         if(     (red >> 4*4) == m_BackgroundColor.getRed() &&
                 (green >> 2*4) == m_BackgroundColor.getGreen()&&
                 (blue >> 0*4) == m_BackgroundColor.getBlue()){
-        	System.out.println(alpha << 6*4);
             return alpha << 6*4;
         }
         else{
