@@ -68,3 +68,4 @@ $RECYCLE.BIN/
 bin
 build
 *.bin
+*.gradle

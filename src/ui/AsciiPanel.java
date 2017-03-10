@@ -1,25 +1,10 @@
 package ui;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.LookupOp;
-import java.awt.image.LookupTable;
-import java.awt.image.ShortLookupTable;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.imageio.ImageIO;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.RepaintManager;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
  * JPanel with a ASCII render system
@@ -27,39 +12,46 @@ import javax.swing.RepaintManager;
  * @author julien MAITRE
  *
  */
-public class AsciiPanel extends JPanel {
-    private Dimension size;
-    private BufferedImage[] character;
+public class AsciiPanel extends ScreenAdapter {
+    private int width;
+    private int height;
+//    private BufferedImage[] character;
+    private TextureRegion[] characters;
     private Color defaultCharacterColor;
     private Color defaultCharacterBackgroundColor;
-    private Dimension characterSize;
+    private int characterWidth;
+    private int characterHeight;
     private AsciiTerminalDataCell[][] terminal;
     private AsciiTerminalDataCell[][] oldTerminal;
-    private Image image;
-    private Graphics2D graphics;
+//    private Image image;
+//    private Graphics2D graphics;
     private int scale;
+    private Camera camera;
 
-    public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight) {
-    	this(dimension, tilesetFile, characterWidth, characterHeight, 1);
+    public AsciiPanel(int width, int height, String tilesetFile, int characterWidth, int characterHeight) {
+    	this(width, height, tilesetFile, characterWidth, characterHeight, 1);
     }
     
-    public AsciiPanel(Dimension dimension, String tilesetFile, int characterWidth, int characterHeight, int scale) {
-        this.size = dimension;
-        this.characterSize = new Dimension(characterWidth, characterHeight);
+    public AsciiPanel(int width, int height, String tilesetFile, int characterWidth, int characterHeight, int scale) {
+        this.width = width;
+        this.height = height;
+        this.characterWidth = characterWidth;
+        this.characterHeight = characterHeight;
         this.scale = scale;
         this.defaultCharacterColor = Color.WHITE;
         this.defaultCharacterBackgroundColor = Color.BLACK;
 
-        terminal = new AsciiTerminalDataCell[size.height][size.width];
-        oldTerminal = new AsciiTerminalDataCell[size.height][size.width];
-        for(int i = 0; i < size.height; i++){
-            for(int j = 0; j < size.width; j++){
+        terminal = new AsciiTerminalDataCell[height][width];
+        oldTerminal = new AsciiTerminalDataCell[height][width];
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
                 terminal[i][j] = new AsciiTerminalDataCell();
                 oldTerminal[i][j] = new AsciiTerminalDataCell();
             }
         }
 
-        this.setPreferredSize(new Dimension(size.width*characterSize.width*scale, size.height*characterSize.height*scale));
+        this.camera = new OrthographicCamera();
+
 
         try {
             character = new  BufferedImage[256];
@@ -91,8 +83,6 @@ public class AsciiPanel extends JPanel {
         catch (IOException ex) {
         	Logger.getLogger(AsciiTerminal.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        this.setLayout(null);
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor){
@@ -279,11 +269,15 @@ public class AsciiPanel extends JPanel {
     public void setDefaultCharacterBackgroundColor(Color defaultCharacterBackgroundColor) {
         this.defaultCharacterBackgroundColor = defaultCharacterBackgroundColor;
     }
-    
-    public Dimension getCharacterSize() {
-		return characterSize;
-	}
-    
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public int getScale() {
 		return scale;
 	}
