@@ -15,11 +15,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  */
 public class AsciiTerminalButton extends Actor {
 	protected final AsciiPanel asciiPanel;
-	private String label;
-	private int x;
-	private int y;
-	private ClickListener clickListener;
-	private boolean isDisabled = false;
+	protected String label;
+	protected int x;
+	protected int y;
+	protected ClickListener clickListener;
+	protected boolean isDisabled = false;
 	protected Color mouseDefaultColor;
 	protected Color mouseClickedColor;
 	protected Color mouseEnteredColor;
@@ -57,7 +57,7 @@ public class AsciiTerminalButton extends Actor {
 		initialize();
 	}
 
-	private void initialize () {
+	protected void initialize () {
 		setTouchable(Touchable.enabled);
 		addListener(clickListener = new ClickListener() {
 			@Override

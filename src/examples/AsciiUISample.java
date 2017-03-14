@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import ui.AsciiPanel;
+import ui.AsciiSelectableTerminalButton;
 import ui.AsciiTerminalButton;
 
 import javax.swing.*;
@@ -36,8 +37,6 @@ public class AsciiUISample extends Game {
             }
         }
 
-//        asciiPanel.writeString(0, 12, "Click on me !", Color.GREEN);
-
         AsciiTerminalButton button1 = new AsciiTerminalButton(asciiPanel, "Click on me !", 0, 12, Color.FOREST, Color.ORANGE, Color.GREEN, Color.BLACK);
         button1.addListener(new ClickListener() {
             @Override
@@ -47,18 +46,9 @@ public class AsciiUISample extends Game {
         });
         asciiPanel.addActor(button1);
 
-//		AsciiSelectableTerminalButton button2 = new AsciiSelectableTerminalButton(asciiPanel, "Select me !", 0, 14, Color.GREEN, Color.ORANGE, Color.MAGENTA);
-//		button2.setCursor(new Cursor(Cursor.HAND_CURSOR));
-//		button2.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				AsciiSelectableTerminalButton astb = (AsciiSelectableTerminalButton)e.getComponent();
-//				astb.setSelect(!astb.isSelect());
-//			}
-//		});
-//		asciiPanel.add(button2);
-//
-//		terminal.repaint();
+        AsciiSelectableTerminalButton button2 = new AsciiSelectableTerminalButton(asciiPanel, "Select me !", 0, 14, Color.FOREST, Color.ORANGE, Color.GREEN, Color.MAGENTA, Color.BLACK);
+        asciiPanel.addActor(button2);
+
         super.setScreen(asciiPanel);
     }
 
@@ -107,4 +97,8 @@ public class AsciiUISample extends Game {
 //			}
 //	    }
 //	}
+
+    public AsciiPanel getAsciiPanel() {
+        return asciiPanel;
+    }
 }
