@@ -1,11 +1,11 @@
 package ui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-
-import javax.swing.JComponent;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 /**
  * A simple button
@@ -13,100 +13,105 @@ import javax.swing.JComponent;
  * @author julien MAITRE
  *
  */
-public class AsciiTerminalButton extends JComponent implements MouseListener {
+public class AsciiTerminalButton extends Actor {
 	protected final AsciiPanel asciiPanel;
-	private String name;
+	private String label;
 	private int x;
 	private int y;
-	protected boolean entered = false;
-	protected Color mouseCurrentColor;
+	private ClickListener clickListener;
+	private boolean isDisabled = false;
 	protected Color mouseDefaultColor;
+	protected Color mouseClickedColor;
 	protected Color mouseEnteredColor;
+	protected Color mouseDisabledColor;
 	protected Color mouseBackgroundColor;
-	
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseEnteredColor) {
-		this.asciiPanel = asciiPanel;
-		this.name = label;
-		this.x = x;
-		this.y = y;
-		this.mouseCurrentColor = mouseDefaultColor;
-		this.mouseDefaultColor = mouseDefaultColor;
-		this.mouseEnteredColor = mouseEnteredColor;
-		setBounds(x*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), y*asciiPanel.getCharacterSize().height*asciiPanel.getScale(), label.length()*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), asciiPanel.getCharacterSize().height*asciiPanel.getScale());
-		this.addMouseListener(this);
+
+	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor) {
+		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, asciiPanel.getDefaultCharacterBackgroundColor());
 	}
-	
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseEnteredColor, Color mouseBackgroundColor) {
+
+	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseBackgroundColor) {
+		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, mouseDefaultColor, mouseBackgroundColor);
+	}
+
+	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseBackgroundColor) {
+		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseDefaultColor, mouseBackgroundColor);
+	}
+
+	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseDisabledColor, Color mouseBackgroundColor) {
 		this.asciiPanel = asciiPanel;
-		this.name = label;
+		this.label = label;
 		this.x = x;
 		this.y = y;
-		this.mouseCurrentColor = mouseDefaultColor;
 		this.mouseDefaultColor = mouseDefaultColor;
+		this.mouseClickedColor = mouseClickedColor;
 		this.mouseEnteredColor = mouseEnteredColor;
+		this.mouseDisabledColor = mouseDisabledColor;
 		this.mouseBackgroundColor = mouseBackgroundColor;
-		setBounds(x*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), y*asciiPanel.getCharacterSize().height*asciiPanel.getScale(), label.length()*asciiPanel.getCharacterSize().width*asciiPanel.getScale(), asciiPanel.getCharacterSize().height*asciiPanel.getScale());
-		this.addMouseListener(this);
+
+		this.setX(x * asciiPanel.getCharacterWidth() * asciiPanel.getScale());
+		this.setY(y * asciiPanel.getCharacterHeight() * asciiPanel.getScale());
+		this.setWidth(label.length() * asciiPanel.getCharacterWidth() * asciiPanel.getScale());
+		this.setHeight(asciiPanel.getCharacterHeight() * asciiPanel.getScale());
+
+		initialize();
+	}
+
+	private void initialize () {
+		setTouchable(Touchable.enabled);
+		addListener(clickListener = new ClickListener() {
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				if(isDisabled()) return;
+			}
+		});
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		// nothing
-	}
+	public void draw(Batch batch, float parentAlpha) {
+		boolean isDisabled = isDisabled();
+		boolean isPressed = isPressed();
+		boolean isOver = isOver();
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// nothing
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// nothing
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		entered = true;
-		mouseCurrentColor = mouseEnteredColor;
-		asciiPanel.repaint(getBounds());
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		entered = false;
-		mouseCurrentColor = mouseDefaultColor;
-		asciiPanel.repaint(getBounds());
-	}
-	
-	@Override
-    public void paintComponent(Graphics g) {
-    	super.paintComponent(g);
-		asciiPanel.writeString(x, y, name, mouseCurrentColor, mouseBackgroundColor != null ? mouseBackgroundColor : asciiPanel.getDefaultCharacterBackgroundColor());
-	}
-	
-	@Override
-	public String getName() {
-		return this.name;
-	}
-	
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
-	
-	public void setMouseDefaultColor(Color mouseDefaultColor) {
-		this.mouseDefaultColor = mouseDefaultColor;
-		if(!entered) {
-			mouseCurrentColor = mouseDefaultColor;
-			asciiPanel.repaint(getBounds());
+		Color current = mouseDefaultColor;
+		if(isDisabled) {
+			current = mouseDisabledColor;
 		}
-	}
-	
-	public void setMouseEnteredColor(Color mouseEnteredColor) {
-		this.mouseEnteredColor = mouseEnteredColor;
-		if(entered) {
-			mouseCurrentColor = mouseEnteredColor;
-			asciiPanel.repaint(getBounds());
+		else if(isPressed) {
+			current = mouseClickedColor;
 		}
+		else if(isOver) {
+			current = mouseEnteredColor;
+		}
+
+		asciiPanel.writeString(x, y, this.label, current, this.mouseBackgroundColor);
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public boolean isDisabled() {
+		return isDisabled;
+	}
+
+	public void setDisabled(boolean disabled) {
+		isDisabled = disabled;
+	}
+
+	public boolean isPressed() {
+		return clickListener.isVisualPressed();
+	}
+
+	public boolean isOver() {
+		return clickListener.isOver();
+	}
+
+	public ClickListener getClickListener() {
+		return clickListener;
 	}
 }

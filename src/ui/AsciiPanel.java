@@ -1,32 +1,44 @@
 package ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FloatFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.nio.ByteBuffer;
 
 /**
- * JPanel with a ASCII render system
+ * ScreenAdapter with a ASCII render system
  * 
- * @author julien MAITRE
+ * @author Julien MAITRE
  *
  */
 public class AsciiPanel extends ScreenAdapter {
     private int width;
     private int height;
-//    private BufferedImage[] character;
+    private Texture texture;
     private TextureRegion[] characters;
+    private Texture backgroundTexture;
     private Color defaultCharacterColor;
     private Color defaultCharacterBackgroundColor;
     private int characterWidth;
     private int characterHeight;
     private AsciiTerminalDataCell[][] terminal;
     private AsciiTerminalDataCell[][] oldTerminal;
-//    private Image image;
-//    private Graphics2D graphics;
     private int scale;
-    private Camera camera;
+    private OrthographicCamera camera;
+    private Viewport viewport;
+    private SpriteBatch batch;
+    private FrameBuffer frameBuffer;
+    private TextureRegion frameRegion;
+    private Stage stage;
 
     public AsciiPanel(int width, int height, String tilesetFile, int characterWidth, int characterHeight) {
     	this(width, height, tilesetFile, characterWidth, characterHeight, 1);
@@ -41,69 +53,112 @@ public class AsciiPanel extends ScreenAdapter {
         this.defaultCharacterColor = Color.WHITE;
         this.defaultCharacterBackgroundColor = Color.BLACK;
 
-        terminal = new AsciiTerminalDataCell[height][width];
-        oldTerminal = new AsciiTerminalDataCell[height][width];
-        for(int i = 0; i < height; i++){
-            for(int j = 0; j < width; j++){
+        terminal = new AsciiTerminalDataCell[width][height];
+        oldTerminal = new AsciiTerminalDataCell[width][height];
+        for(int i = 0; i < width; i++){
+            for(int j = 0; j < height; j++){
                 terminal[i][j] = new AsciiTerminalDataCell();
                 oldTerminal[i][j] = new AsciiTerminalDataCell();
             }
         }
 
         this.camera = new OrthographicCamera();
+        this.camera.setToOrtho(true);
+        this.viewport = new FitViewport(width*characterWidth*scale, height*characterHeight*scale, camera);
+        this.viewport.apply();
+        this.batch = new SpriteBatch();
 
+        this.frameBuffer = new FloatFrameBuffer(getFullWidth(), getFullHeight(), false);
+        this.frameBuffer.getColorBufferTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        this.frameRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
+        this.frameRegion.flip(false, true);
 
-        try {
-            character = new  BufferedImage[256];
-            BufferedImage tilesets = ImageIO.read(getClass().getResource(tilesetFile));
+        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
 
-            // Recuperation of the background color
-            BufferedImage imageBackgroundColor = tilesets.getSubimage(0, 0, 1, 1);
-            int color = imageBackgroundColor.getRGB(0, 0);
-            Color m_characterBackgroundColor = Color.getColor(null, color);
+        Pixmap whitePixmap = new Pixmap(characterWidth, characterHeight, Pixmap.Format.RGBA8888);
+        whitePixmap.setColor(Color.WHITE);
+        whitePixmap.fill();
+        this.backgroundTexture = new Texture(whitePixmap);
 
-            // Modification of characters background
-            Image characterBackgroundColorModified = createImage(new FilteredImageSource(tilesets.getSource(), new AsciiBackgroundFilter(m_characterBackgroundColor)));
+        Pixmap pixmap = new Pixmap(Gdx.files.internal(tilesetFile));
+        Pixmap resutPixmap = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Pixmap.Format.RGBA8888);
 
-            // Creation of tileset with a modification of the background color
-            BufferedImage tilesetsModified = new BufferedImage(tilesets.getWidth(), tilesets.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            Graphics graphicsTilesetsModified = tilesetsModified.getGraphics();
-            graphicsTilesetsModified.setColor(Color.BLACK);
-            graphicsTilesetsModified.fillRect(0, 0, tilesetsModified.getWidth(), tilesetsModified.getHeight());
-            // Draw in a BufferedImage for characters recuperation
-            graphicsTilesetsModified.drawImage(characterBackgroundColorModified, 0, 0, this);
+        ByteBuffer buffer = pixmap.getPixels();
+        ByteBuffer resultBuffer = resutPixmap.getPixels();
+        buffer.rewind();
+        resultBuffer.rewind();
 
-            for(int i = 0; i < 256; i++){
-                int x = (i%16)*characterSize.width;
-                int y = (i/16)*characterSize.height;
-                character[i] = new BufferedImage(characterSize.width, characterSize.height, BufferedImage.TYPE_INT_ARGB);
-                character[i].getGraphics().drawImage(tilesetsModified, 0, 0, characterSize.width, characterSize.height, x, y, x+characterSize.width, y+characterSize.height, this);
+        boolean start = true;
+        byte rBackground = 0;
+        byte gBackground = 0;
+        byte bBackground = 0;
+        byte aBackground = -1;
+
+        while(buffer.hasRemaining()) {
+            byte r = buffer.get();
+            byte g = buffer.get();
+            byte b = buffer.get();
+            byte a = pixmap.getFormat() == Pixmap.Format.RGBA8888 ? buffer.get() : -1;
+
+            if(start) {
+                start = false;
+                rBackground = r;
+                gBackground = g;
+                bBackground = b;
+                aBackground = a;
+            }
+
+            if(r == rBackground && g == gBackground && b == bBackground && a == aBackground) {
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+            }
+            else {
+                resultBuffer.put(r);
+                resultBuffer.put(g);
+                resultBuffer.put(b);
+                resultBuffer.put(a);
             }
         }
-        catch (IOException ex) {
-        	Logger.getLogger(AsciiTerminal.class.getName()).log(Level.SEVERE, null, ex);
+        buffer.rewind();
+        resultBuffer.rewind();
+
+        pixmap.dispose();
+
+        texture = new Texture(resutPixmap);
+
+        characters = new TextureRegion[256];
+        for(int i = 0; i < 256; i++) {
+            int x = (i%16)*characterWidth;
+            int y = (i/16)*characterHeight;
+
+            characters[i] = new TextureRegion(texture, x, y, characterWidth, characterHeight);
         }
+
+        this.stage = new Stage(viewport, batch);
+        Gdx.input.setInputProcessor(stage);
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor){
         this.write(positionX, positionY, character, characterColor, defaultCharacterBackgroundColor);
     }
-    
+
     public void write(int positionX, int positionY, AsciiTerminalDataCell character){
         this.write(positionX, positionY, character.data, character.dataColor, character.backgroundColor);
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor, Color characterBackgroundColor){
-        if(positionX < 0 || positionX > size.width - 1){
-            throw new IllegalArgumentException("X position between [0 and "+size.width+"]");
+        if(positionX < 0 || positionX > width - 1){
+            throw new IllegalArgumentException("X position between [0 and "+width+"]");
         }
-        if(positionY < 0 || positionY > size.height - 1){
-            throw new IllegalArgumentException("Y position between [0 and "+size.height+"]");
+        if(positionY < 0 || positionY > height - 1){
+            throw new IllegalArgumentException("Y position between [0 and "+height+"]");
         }
-        
-        terminal[positionY][positionX].data = character;
-        terminal[positionY][positionX].dataColor = characterColor;
-        terminal[positionY][positionX].backgroundColor = characterBackgroundColor;
+
+        terminal[positionX][positionY].data = character;
+        terminal[positionX][positionY].dataColor = characterColor;
+        terminal[positionX][positionY].backgroundColor = characterBackgroundColor;
     }
 
     public void writeString(int positionX, int positionY, String string, Color characterColor){
@@ -120,21 +175,21 @@ public class AsciiPanel extends ScreenAdapter {
     public AsciiTerminalDataCell readCurrent(int x, int y){
         return this.oldTerminal[y][x];
     }
-    
+
     public AsciiTerminalDataCell readNext(int x, int y){
         return this.terminal[y][x];
     }
 
     public void clear(){
-        clear(0, 0, size.width, size.height);
+        clear(0, 0, width, height);
     }
 
     public void clear(int x, int y, int width, int height){
-        if(x < 0 || x > size.width - 1){
-            throw new IllegalArgumentException("X position between [0 and "+(size.width-1)+"]");
+        if(x < 0 || x > width - 1){
+            throw new IllegalArgumentException("X position between [0 and "+(width-1)+"]");
         }
-        if(y < 0 || y > size.height - 1){
-            throw new IllegalArgumentException("Y position between [0 and "+(size.height-1)+"]");
+        if(y < 0 || y > height - 1){
+            throw new IllegalArgumentException("Y position between [0 and "+(height-1)+"]");
         }
         if(width < 1){
             throw new IllegalArgumentException("Width under 1");
@@ -142,7 +197,7 @@ public class AsciiPanel extends ScreenAdapter {
         if(height < 1){
             throw new IllegalArgumentException("Height under 1");
         }
-        if(width+x > size.width || height+y > size.height){
+        if(width+x > width || height+y > height){
             throw new IllegalArgumentException("Clear over the terminal");
         }
         for(int i = y; i < y + height; i++){
@@ -151,109 +206,66 @@ public class AsciiPanel extends ScreenAdapter {
             }
         }
     }
-    
+
     @Override
-    public void paintComponent(Graphics g) {
-    	super.paintComponent(g);
-        if(image == null) {
-			image = this.createImage(this.getPreferredSize().width, this.getPreferredSize().height);
-            graphics = (Graphics2D)image.getGraphics();
-            graphics.setColor(defaultCharacterBackgroundColor);
-            graphics.fillRect(0, 0, this.getWidth(), this.getHeight());
-    	}
-        
-        for(Component component : getComponents()) {
-        	component.paint(graphics);
-        }
-		
-		for(int i = 0; i < size.height; i++){
-            for(int j = 0; j < size.width; j++){
-                if(     terminal[i][j].data == oldTerminal[i][j].data &&
-                        terminal[i][j].dataColor.equals(oldTerminal[i][j].dataColor) &&
-                        terminal[i][j].backgroundColor.equals(oldTerminal[i][j].backgroundColor)) {
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act(delta);
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+
+        stage.draw();
+
+        frameBuffer.begin();
+        batch.begin();
+        for(int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if(     terminal[x][y].data == oldTerminal[x][y].data &&
+                        terminal[x][y].dataColor.equals(oldTerminal[x][y].dataColor) &&
+                        terminal[x][y].backgroundColor.equals(oldTerminal[x][y].backgroundColor)) {
                     continue;
                 }
 
-                LookupOp lookupOp = setColorCharacter(terminal[i][j].backgroundColor, terminal[i][j].dataColor);
-                graphics.drawImage(lookupOp.filter(character[terminal[i][j].data], null), j*characterSize.width*scale, i*characterSize.height*scale, characterSize.width*scale, characterSize.height*scale, this);
+                batch.setColor(terminal[x][y].backgroundColor);
+                batch.draw(backgroundTexture, x*characterWidth*scale, (height - y - 1)*characterHeight*scale, characterWidth*scale, characterHeight*scale);
+                batch.setColor(terminal[x][y].dataColor);
+                batch.draw(characters[terminal[x][y].data], x*characterWidth*scale, (height - y - 1)*characterHeight*scale, characterWidth*scale, characterHeight*scale);
 
-                oldTerminal[i][j].data = terminal[i][j].data;
-                oldTerminal[i][j].dataColor = terminal[i][j].dataColor;
-                oldTerminal[i][j].backgroundColor = terminal[i][j].backgroundColor;
+                oldTerminal[x][y].data = terminal[x][y].data;
+                oldTerminal[x][y].dataColor = terminal[x][y].dataColor;
+                oldTerminal[x][y].backgroundColor = terminal[x][y].backgroundColor;
             }
         }
-    	g.drawImage(image, 0, 0, this);
+        batch.end();
+        frameBuffer.end();
+
+
+        batch.setColor(Color.WHITE);
+        batch.begin();
+        viewport.apply();
+        batch.draw(frameRegion, 0, 0);
+        batch.end();
     }
 
-    private LookupOp setColorCharacter(Color bgColor, Color fgColor){
-        short[] red = new short[256];
-        short[] green = new short[256];
-        short[] blue = new short[256];
-        short[] alpha = new short[256];
-
-        // Recuperation of compound colors of foreground character color
-        short dcr = (short) fgColor.getRed();
-        short dcg = (short) fgColor.getGreen();
-        short dcb = (short) fgColor.getBlue();
-
-        // Recuperation of compound colors of background character color
-        short bgr = (short) bgColor.getRed();
-        short bgg = (short) bgColor.getGreen();
-        short bgb = (short) bgColor.getBlue();
-
-        for(short j = 0; j < 256; j++){
-        	// if is foreground color
-            if(j != 0){
-
-                /**
-                 * Calculation of j*255/dcr .
-                 * Cross product
-                 * dcr = 180     255
-                 *   j =  ?       X
-                 * Distribute the requested color [0 to 255] on the character color [0 to X]
-                 */
-                // Red
-                if(dcr != 0){
-                    red[j] = (short)(j*dcr/255);
-                }
-                else{
-                    red[j] = 0;
-                }
-
-                // green
-                if(dcg != 0){
-                    green[j] = (short)(j*dcg/255);
-                }
-                else{
-                    green[j] = 0;
-                }
-
-                // Blue
-                if( dcb != 0){
-                    blue[j] = (short)(j*dcb/255);
-                }
-                else{
-                    blue[j] = 0;
-                }
-
-                // Alpha
-                alpha[j] = 255;
-            }
-            // else is background color
-            else {
-                red[j] = bgr;
-                green[j] = bgg;
-                blue[j] = bgb;
-                alpha[j] = 255;
-            }
-        }
-
-        short[][] data = new short[][]{red, green, blue, alpha};
-        LookupTable lookupTable = new ShortLookupTable(0, data);
-        LookupOp lookupOp = new LookupOp(lookupTable, null);
-        return lookupOp;
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
     }
-    
+
+    public void addActor(Actor actor) {
+        stage.addActor(actor);
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        frameBuffer.dispose();
+        texture.dispose();
+        backgroundTexture.dispose();
+    }
+
     public Color getDefaultCharacterColor(){
         return this.defaultCharacterColor;
     }
@@ -270,18 +282,26 @@ public class AsciiPanel extends ScreenAdapter {
         this.defaultCharacterBackgroundColor = defaultCharacterBackgroundColor;
     }
 
-    public int getWidth() {
-        return width;
+    public int getFullWidth() {
+        return width * characterWidth * scale;
     }
 
-    public int getHeight() {
-        return height;
+    public int getFullHeight() {
+        return height * characterHeight * scale;
+    }
+
+    public int getCharacterWidth() {
+        return characterWidth;
+    }
+
+    public int getCharacterHeight() {
+        return characterHeight;
     }
 
     public int getScale() {
 		return scale;
 	}
-    
+
     public AsciiTerminalDataCell getCell(int x, int y) {
     	return terminal[y][x];
     }

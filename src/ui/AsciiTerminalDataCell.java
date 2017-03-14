@@ -1,6 +1,6 @@
 package ui;
 
-import java.awt.Color;
+import com.badlogic.gdx.graphics.Color;
 
 /**
  * Representation of data of one character in the AsciiPanel
