@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  */
 public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 	private boolean selected = false;
+	private boolean justSelected = false;
 	private Color mouseSelectedColor;
 
 	public AsciiSelectableTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseSelectedColor) {
@@ -36,31 +37,6 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		this.mouseSelectedColor = mouseSelectedColor;
 	}
 
-//	public void setSelect(boolean select) {
-//		this.select = select;
-//		changeColor();
-//	}
-//
-//	public boolean isSelect() {
-//		return select;
-//	}
-//
-//	@Override
-//	public void mouseExited(MouseEvent e) {
-//		super.mouseExited(e);
-//		changeColor();
-//	}
-//
-//	private void changeColor() {
-//		if(select) {
-//			mouseCurrentColor = mouseSelectColor;
-//		}
-//		else {
-//			mouseCurrentColor = mouseDefaultColor;
-//		}
-////		asciiPanel.repaint(getBounds());
-//	}
-
 	@Override
 	protected void initialize () {
 		setTouchable(Touchable.enabled);
@@ -69,6 +45,7 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 			public void clicked(InputEvent event, float x, float y) {
 				if(isDisabled()) return;
 				selected = !selected;
+				justSelected = selected;
 			}
 		});
 	}
@@ -78,6 +55,7 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		boolean isDisabled = isDisabled();
 		boolean isPressed = isPressed();
 		boolean isSelected = isSelected();
+		boolean isJustSelected = isJustSelected();
 		boolean isOver = isOver();
 
 		Color current = mouseDefaultColor;
@@ -87,11 +65,18 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		else if(isPressed) {
 			current = mouseClickedColor;
 		}
-		else if(isSelected) {
+		else if(isJustSelected) {
 			current = mouseSelectedColor;
 		}
 		else if(isOver) {
 			current = mouseEnteredColor;
+		}
+		else if(isSelected) {
+			current = mouseSelectedColor;
+		}
+
+		if(!isOver && justSelected) {
+			justSelected = false;
 		}
 
 		asciiPanel.writeString(x, y, this.label, current, this.mouseBackgroundColor);
@@ -99,5 +84,9 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 
 	public boolean isSelected() {
 		return selected;
+	}
+
+	public boolean isJustSelected() {
+		return justSelected;
 	}
 }
