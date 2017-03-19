@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
  *
  */
 public class AsciiTerminalButton extends Actor {
-	protected final AsciiPanel asciiPanel;
+	protected final AsciiTerminal asciiTerminal;
 	protected String label;
 	protected int x;
 	protected int y;
@@ -26,20 +26,20 @@ public class AsciiTerminalButton extends Actor {
 	protected Color mouseDisabledColor;
 	protected Color mouseBackgroundColor;
 
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor) {
-		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, asciiPanel.getDefaultCharacterBackgroundColor());
+	public AsciiTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor) {
+		this(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, asciiTerminal.getDefaultCharacterBackgroundColor());
 	}
 
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseBackgroundColor) {
-		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, mouseDefaultColor, mouseBackgroundColor);
+	public AsciiTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseBackgroundColor) {
+		this(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, mouseDefaultColor, mouseBackgroundColor);
 	}
 
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseBackgroundColor) {
-		this(asciiPanel, label, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseDefaultColor, mouseBackgroundColor);
+	public AsciiTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseBackgroundColor) {
+		this(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseDefaultColor, mouseBackgroundColor);
 	}
 
-	public AsciiTerminalButton(AsciiPanel asciiPanel, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseDisabledColor, Color mouseBackgroundColor) {
-		this.asciiPanel = asciiPanel;
+	public AsciiTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseDisabledColor, Color mouseBackgroundColor) {
+		this.asciiTerminal = asciiTerminal;
 		this.label = label;
 		this.x = x;
 		this.y = y;
@@ -49,10 +49,10 @@ public class AsciiTerminalButton extends Actor {
 		this.mouseDisabledColor = mouseDisabledColor;
 		this.mouseBackgroundColor = mouseBackgroundColor;
 
-		this.setX(x * asciiPanel.getCharacterWidth() * asciiPanel.getScale());
-		this.setY(y * asciiPanel.getCharacterHeight() * asciiPanel.getScale());
-		this.setWidth(label.length() * asciiPanel.getCharacterWidth() * asciiPanel.getScale());
-		this.setHeight(asciiPanel.getCharacterHeight() * asciiPanel.getScale());
+		this.setX(x * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
+		this.setY(y * asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
+		this.setWidth(label.length() * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
+		this.setHeight(asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
 
 		initialize();
 	}
@@ -84,7 +84,7 @@ public class AsciiTerminalButton extends Actor {
 			current = mouseEnteredColor;
 		}
 
-		asciiPanel.writeString(x, y, this.label, current, this.mouseBackgroundColor);
+		asciiTerminal.writeString(x, y, this.label, current, this.mouseBackgroundColor);
 	}
 
 	public String getLabel() {
