@@ -32,9 +32,9 @@ public class AsciiTetris extends Game {
 	private static final int DISPLAY_PLAYFIELD_HEIGHT = 20;
 
 	private static final float SOFT_DROP_SPEED = 0.05f;
-	private static final int SOFT_DROP_BONUS_GridPoint2 = 6;
+	private static final int SOFT_DROP_BONUS_GRIDPOINT2 = 6;
 
-	private static final float REPEAT_KEY_EVENT = 5f;
+	private static final float REPEAT_KEY_EVENT = 0.07f;
 
 	private AsciiTerminal asciiTerminal;
 
@@ -130,27 +130,6 @@ public class AsciiTetris extends Game {
 		GAME_OVER
 	}
 
-//	public AsciiTetris(String tileset, int characterWidth, int characterHeight, int scale) throws Exception {
-//
-//
-//
-//		asciiTerminal.addKeyListener(new KeyAdapter() {
-//			@Override
-//			public void keyPressed(KeyEvent e) {
-//				if(!continueKeyEvents.get(e)) {
-//					instantKeyEvents.set(e);
-//				}
-//				continueKeyEvents.set(e);
-//				event = e;
-//			}
-//
-//			@Override
-//			public void keyReleased(KeyEvent e) {
-//				continueKeyEvents.clear(e);
-//			}
-//		});
-//	}
-
 	@Override
 	public void create() {
 		String[] choiceTileset = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
@@ -194,7 +173,7 @@ public class AsciiTetris extends Game {
 
 	private void init(String tilesetFile, int characterWidth, int characterHeight, int scale) {
 		asciiTerminal = new AsciiTerminal("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, tilesetFile, characterWidth, characterHeight, scale);
-		Gdx.graphics.setWindowedMode(AsciiUISample.WINDOW_WIDTH * characterWidth * scale, AsciiUISample.WINDOW_HEIGHT * characterHeight * scale);
+		Gdx.graphics.setWindowedMode(AsciiTetris.WINDOW_WIDTH * characterWidth * scale, AsciiTetris.WINDOW_HEIGHT * characterHeight * scale);
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			@Override
@@ -347,8 +326,7 @@ public class AsciiTetris extends Game {
 						break;
 
 					case 2:
-						asciiTerminal.dispose();
-						System.exit(0);
+						Gdx.app.exit();
 						break;
 
 					default:
@@ -541,7 +519,7 @@ public class AsciiTetris extends Game {
 
 
 		// DROP SPEED & SOFT DROP
-		double tickDuration = tickDuration()*100;
+		double tickDuration = tickDuration();
 		if(softDrop) {
 			tickDuration = SOFT_DROP_SPEED;
 		}
@@ -553,7 +531,7 @@ public class AsciiTetris extends Game {
 		if(timer >= tickDuration) {
 			timer -= tickDuration;
 			if(softDrop) {
-				score += SOFT_DROP_BONUS_GridPoint2;
+				score += SOFT_DROP_BONUS_GRIDPOINT2;
 			}
 
 			boolean goDown = true;
@@ -701,8 +679,7 @@ public class AsciiTetris extends Game {
 						break;
 
 					case 2:
-						asciiTerminal.dispose();
-						System.exit(0);
+						Gdx.app.exit();
 						break;
 
 					default:
@@ -762,8 +739,7 @@ public class AsciiTetris extends Game {
 						break;
 
 					case 2:
-						asciiTerminal.dispose();
-						System.exit(0);
+						Gdx.app.exit();
 						break;
 
 					default:
