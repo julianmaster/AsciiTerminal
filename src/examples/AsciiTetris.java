@@ -173,7 +173,6 @@ public class AsciiTetris extends Game {
 
 	private void init(String tilesetFile, int characterWidth, int characterHeight, int scale) {
 		asciiTerminal = new AsciiTerminal("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, tilesetFile, characterWidth, characterHeight, scale);
-		Gdx.graphics.setWindowedMode(AsciiTetris.WINDOW_WIDTH * characterWidth * scale, AsciiTetris.WINDOW_HEIGHT * characterHeight * scale);
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			@Override
