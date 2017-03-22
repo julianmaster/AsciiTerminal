@@ -49,11 +49,7 @@ public class AsciiTerminalButton extends Actor {
 		this.mouseDisabledColor = mouseDisabledColor;
 		this.mouseBackgroundColor = mouseBackgroundColor;
 
-		this.setX(x * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
-		this.setY(y * asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
-		this.setWidth(label.length() * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
-		this.setHeight(asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
-
+		sizeChanged();
 		initialize();
 	}
 
@@ -65,6 +61,18 @@ public class AsciiTerminalButton extends Actor {
 				if(isDisabled()) return;
 			}
 		});
+	}
+
+	public void hasSizeChanged() {
+		sizeChanged();
+	}
+
+	@Override
+	protected void sizeChanged() {
+		this.setX(x * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
+		this.setY(y * asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
+		this.setWidth(label.length() * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
+		this.setHeight(asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package examples;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -19,6 +20,7 @@ public class AsciiUISample extends Game {
 	public static final int WINDOW_WIDTH = 16;
 	public static final int WINDOW_HEIGHT = 16;
 
+    private Random rand = new Random();
 	private AsciiTerminal asciiTerminal;
 
     @Override
@@ -57,9 +59,6 @@ public class AsciiUISample extends Game {
 
     public void init(String tilesetFile, int characterWidth, int characterHeight, int scale) {
         asciiTerminal = new AsciiTerminal(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, tilesetFile, characterWidth, characterHeight, scale);
-        Gdx.graphics.setWindowedMode(AsciiUISample.WINDOW_WIDTH * characterWidth * scale, AsciiUISample.WINDOW_HEIGHT * characterHeight * scale);
-
-        Random rand = new Random();
 
         for(int i = 0; i < 16; i++) {
             for(int j = 0; j < 10; j++) {
@@ -80,6 +79,21 @@ public class AsciiUISample extends Game {
         asciiTerminal.addActor(button2);
 
         super.setScreen(asciiTerminal);
+    }
+
+    @Override
+    public void render() {
+        super.render();
+
+        if(Gdx.input.isKeyPressed(Input.Keys.A)) {
+            asciiTerminal.changeSettings("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, "Curses_square_24x24.png", 24, 24, 1);
+
+            for(int i = 0; i < 16; i++) {
+                for(int j = 0; j < 10; j++) {
+                    asciiTerminal.write(i, j, (char)rand.nextInt(256), new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 1f));
+                }
+            }
+        }
     }
 
     @Override

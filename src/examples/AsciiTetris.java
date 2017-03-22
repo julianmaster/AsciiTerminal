@@ -344,6 +344,10 @@ public class AsciiTetris extends Game {
 				menuPosition++;
 			}
 
+			else if(event == Input.Keys.A) {
+				asciiTerminal.changeSettings("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, "Curses_square_24x24.png", 24, 24, 1);
+			}
+
 			event = 0;
 		}
 		menuPosition %= 3;
@@ -381,7 +385,6 @@ public class AsciiTetris extends Game {
 
 			event = 0;
 		}
-
 
 		asciiTerminal.writeString(1, 6, "LEADERBOARDS", Color.WHITE);
 		for(int i = 0; i < 5; i++) {

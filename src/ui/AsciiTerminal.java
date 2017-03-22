@@ -26,8 +26,8 @@ public class AsciiTerminal extends ScreenAdapter {
     private Texture texture;
     private TextureRegion[] characters;
     private Texture backgroundTexture;
-    private Color defaultCharacterColor;
-    private Color defaultCharacterBackgroundColor;
+    private Color defaultCharacterColor = Color.WHITE;
+    private Color defaultCharacterBackgroundColor = Color.BLACK;
     private int characterWidth;
     private int characterHeight;
     private AsciiTerminalDataCell[][] terminal;
@@ -50,10 +50,9 @@ public class AsciiTerminal extends ScreenAdapter {
         this.characterWidth = characterWidth;
         this.characterHeight = characterHeight;
         this.scale = scale;
-        this.defaultCharacterColor = Color.WHITE;
-        this.defaultCharacterBackgroundColor = Color.BLACK;
 
         Gdx.graphics.setTitle(title);
+        Gdx.graphics.setWindowedMode(width * characterWidth * scale, height * characterHeight * scale);
 
         terminal = new AsciiTerminalDataCell[width][height];
         oldTerminal = new AsciiTerminalDataCell[width][height];
@@ -140,6 +139,104 @@ public class AsciiTerminal extends ScreenAdapter {
 
         this.stage = new Stage(viewport, batch);
         Gdx.input.setInputProcessor(stage);
+    }
+
+    public void changeSettings(String title, int width, int height, String tilesetFile, int characterWidth, int characterHeight, int scale) {
+        this.width = width;
+        this.height = height;
+        this.characterWidth = characterWidth;
+        this.characterHeight = characterHeight;
+        this.scale = scale;
+
+        Gdx.graphics.setTitle(title);
+        Gdx.graphics.setWindowedMode(width * characterWidth * scale, height * characterHeight * scale);
+
+        terminal = new AsciiTerminalDataCell[width][height];
+        oldTerminal = new AsciiTerminalDataCell[width][height];
+        for(int i = 0; i < width; i++){
+            for(int j = 0; j < height; j++){
+                terminal[i][j] = new AsciiTerminalDataCell();
+                oldTerminal[i][j] = new AsciiTerminalDataCell();
+            }
+        }
+
+        this.viewport.setWorldSize(width*characterWidth*scale, height*characterHeight*scale);
+        this.viewport.apply();
+
+        this.frameBuffer.dispose();
+        this.frameBuffer = new FloatFrameBuffer(getFullWidth(), getFullHeight(), false);
+        this.frameBuffer.getColorBufferTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        this.frameRegion = new TextureRegion(frameBuffer.getColorBufferTexture());
+        this.frameRegion.flip(false, true);
+
+        camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
+
+        Pixmap whitePixmap = new Pixmap(characterWidth, characterHeight, Pixmap.Format.RGBA8888);
+        whitePixmap.setColor(Color.WHITE);
+        whitePixmap.fill();
+        backgroundTexture.dispose();
+        this.backgroundTexture = new Texture(whitePixmap);
+
+        Pixmap pixmap = new Pixmap(Gdx.files.internal(tilesetFile));
+        Pixmap resutPixmap = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Pixmap.Format.RGBA8888);
+
+        ByteBuffer buffer = pixmap.getPixels();
+        ByteBuffer resultBuffer = resutPixmap.getPixels();
+        buffer.rewind();
+        resultBuffer.rewind();
+
+        boolean start = true;
+        byte rBackground = 0;
+        byte gBackground = 0;
+        byte bBackground = 0;
+        byte aBackground = -1;
+
+        while(buffer.hasRemaining()) {
+            byte r = buffer.get();
+            byte g = buffer.get();
+            byte b = buffer.get();
+            byte a = pixmap.getFormat() == Pixmap.Format.RGBA8888 ? buffer.get() : -1;
+
+            if(start) {
+                start = false;
+                rBackground = r;
+                gBackground = g;
+                bBackground = b;
+                aBackground = a;
+            }
+
+            if(r == rBackground && g == gBackground && b == bBackground && a == aBackground) {
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+                resultBuffer.put((byte)0);
+            }
+            else {
+                resultBuffer.put(r);
+                resultBuffer.put(g);
+                resultBuffer.put(b);
+                resultBuffer.put(a);
+            }
+        }
+        buffer.rewind();
+        resultBuffer.rewind();
+
+        pixmap.dispose();
+
+        texture.dispose();
+        texture = new Texture(resutPixmap);
+
+        characters = new TextureRegion[256];
+        for(int i = 0; i < 256; i++) {
+            int x = (i%16)*characterWidth;
+            int y = (i/16)*characterHeight;
+
+            characters[i] = new TextureRegion(texture, x, y, characterWidth, characterHeight);
+        }
+
+        for(Actor actor  : stage.getActors()) {
+            ((AsciiTerminalButton)actor).hasSizeChanged();
+        }
     }
 
     public void write(int positionX, int positionY, char character, Color characterColor){
@@ -256,12 +353,13 @@ public class AsciiTerminal extends ScreenAdapter {
         camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
     }
 
-    public void addActor(Actor actor) {
+    public void addActor(AsciiTerminalButton actor) {
         stage.addActor(actor);
     }
 
     @Override
     public void dispose() {
+        stage.dispose();
         batch.dispose();
         frameBuffer.dispose();
         texture.dispose();
