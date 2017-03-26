@@ -10,10 +10,7 @@ import ui.AsciiTerminal;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 
 class Leaderboards implements Serializable {
 	private static final long serialVersionUID = 2274204318785895973L;
@@ -21,6 +18,7 @@ class Leaderboards implements Serializable {
 }
 
 public class AsciiTetris extends Game {
+	private static final String TITLE = "AsciiTetris";
 	private static final int WINDOW_WIDTH = 21;
 	private static final int WINDOW_HEIGHT = 24;
 
@@ -37,8 +35,16 @@ public class AsciiTetris extends Game {
 	private static final float REPEAT_KEY_EVENT = 0.07f;
 
 	private AsciiTerminal asciiTerminal;
+	private boolean currentPositionHelper = true;
+	private Tileset currentTileset = Tileset.ANIKKI;
+	private Scale curentScale = Scale.MEDIUM;
 
 	private Random rand = new Random();
+
+	private boolean initSettings = false;
+	private boolean nextPositionHelper = true;
+	private Tileset nextTileset = currentTileset;
+	private Scale nextScale = curentScale;
 
 	private Leaderboards leaderboards = new Leaderboards();
 	private GameState gameState = GameState.MENU;
@@ -123,6 +129,7 @@ public class AsciiTetris extends Game {
 
 	enum GameState {
 		MENU,
+		SETTINGS,
 		LEADERBOARDS,
 		START,
 		PLAY,
@@ -130,49 +137,49 @@ public class AsciiTetris extends Game {
 		GAME_OVER
 	}
 
+	enum Tileset {
+		ANIKKI("ANIKKI", "Anikki_square_8x8.png", 8, 8),
+		YOSHIS_ISLAND("YOSHIS ISLAND", "Yoshis_island_9x12.png", 9, 12),
+		VIDUMEC("VIDUMEC", "Vidumec_15x15.png", 15, 15),
+		WANDERLUST("WANDERLUST", "wanderlust_16x16.png", 16, 16),
+		CURSES_SQUARE("CURSES SQUARE", "Curses_square_24x24.png", 24, 24);
+
+		public String name;
+		public String file;
+		public int characterWidth;
+		public int characterHeight;
+
+		Tileset(String name, String file, int characterWidth, int characterHeight) {
+			this.name = name;
+			this.file = file;
+			this.characterWidth = characterWidth;
+			this.characterHeight = characterHeight;
+		}
+	}
+
+	enum Scale {
+		SMALL("SMALL", 1),
+		MEDIUM("MEDIUM", 2),
+		LARGE("LARGE", 3);
+
+		public String name;
+		public int value;
+
+		Scale(String name, int value) {
+			this.name = name;
+			this.value = value;
+		}
+	}
+
 	@Override
 	public void create() {
-		String[] choiceTileset = { "Anikki [8x8]", "Yoshis island [9x12]", "Vidumec [15x15]", "Wanderlust [16x16]", "Curses square [24x24]" };
-		JComboBox<String> comboChoiceTileset = new JComboBox<>(choiceTileset);
-
-		String[] choiceScale = { "Small", "Medium", "Large"};
-		JComboBox<String> comboChoiceScale = new JComboBox<>(choiceScale);
-		comboChoiceScale.setSelectedItem("Medium");
-		Object[] choices = {
-				"Tileset:", comboChoiceTileset,
-				"Scale:", comboChoiceScale
-		};
-
-		int option = JOptionPane.showConfirmDialog(null, choices, "Configurations", JOptionPane.OK_CANCEL_OPTION);
-		if(option == JOptionPane.OK_OPTION) {
-			int scale = comboChoiceScale.getSelectedIndex()+1;
-			if(comboChoiceTileset.getSelectedItem().equals("Anikki [8x8]")) {
-				init("Anikki_square_8x8.png", 8, 8, scale);
-			}
-			else if(comboChoiceTileset.getSelectedItem().equals("Yoshis island [9x12]")) {
-				init("Yoshis_island_9x12.png", 9, 12, scale);
-			}
-			else if(comboChoiceTileset.getSelectedItem().equals("Vidumec [15x15]")) {
-				init("Vidumec_15x15.png", 15, 15, scale);
-			}
-			else if(comboChoiceTileset.getSelectedItem().equals("Wanderlust [16x16]")) {
-				init("wanderlust_16x16.png", 16, 16, scale);
-			}
-			else {
-				init("Curses_square_24x24.png", 24, 24, scale);
-			}
-		}
-
-
 		try {
 			loadLeaderboards();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
 
-	private void init(String tilesetFile, int characterWidth, int characterHeight, int scale) {
-		asciiTerminal = new AsciiTerminal("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, tilesetFile, characterWidth, characterHeight, scale);
+		asciiTerminal = new AsciiTerminal(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, curentScale.value);
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			@Override
@@ -246,42 +253,44 @@ public class AsciiTetris extends Game {
 		 */
 		asciiTerminal.clear();
 
-		// PLAYFIELD BORDER
-		Color color = Color.DARK_GRAY;
-		asciiTerminal.write(1, 1, (char)201, color);
-		asciiTerminal.write(12, 1, (char)187, color);
-		asciiTerminal.write(1, 22, (char)200, color);
-		asciiTerminal.write(12, 22, (char)188, color);
-		for(int i = 0; i < 10; i++) {
-			asciiTerminal.write(2+i, 1, (char)205, color);
-			asciiTerminal.write(2+i, 22, (char)205, color);
-		}
-		for(int j = 0; j < 20; j++) {
-			asciiTerminal.write(1, 2+j, (char)186, color);
-			asciiTerminal.write(12, 2+j, (char)186, color);
-		}
+		if(gameState != GameState.SETTINGS) {
+			// PLAYFIELD BORDER
+			Color color = Color.DARK_GRAY;
+			asciiTerminal.write(1, 1, (char)201, color);
+			asciiTerminal.write(12, 1, (char)187, color);
+			asciiTerminal.write(1, 22, (char)200, color);
+			asciiTerminal.write(12, 22, (char)188, color);
+			for(int i = 0; i < 10; i++) {
+				asciiTerminal.write(2+i, 1, (char)205, color);
+				asciiTerminal.write(2+i, 22, (char)205, color);
+			}
+			for(int j = 0; j < 20; j++) {
+				asciiTerminal.write(1, 2+j, (char)186, color);
+				asciiTerminal.write(12, 2+j, (char)186, color);
+			}
 
-		// SCORE
-		asciiTerminal.writeString(14, 2, "SCORE", Color.BLUE);
-		asciiTerminal.writeString(14, 3, String.format("%06d", score), Color.CYAN);
+			// SCORE
+			asciiTerminal.writeString(14, 2, "SCORE", Color.BLUE);
+			asciiTerminal.writeString(14, 3, String.format("%06d", score), Color.CYAN);
 
-		// LEVEL
-		asciiTerminal.writeString(14, 5, "LEVEL", Color.BLUE);
-		asciiTerminal.writeString(14, 6, String.format("%06d", level), Color.CYAN);
+			// LEVEL
+			asciiTerminal.writeString(14, 5, "LEVEL", Color.BLUE);
+			asciiTerminal.writeString(14, 6, String.format("%06d", level), Color.CYAN);
 
-		// NEXT TETROMINO BORDER
-		asciiTerminal.writeString(15, 8, "NEXT", Color.BLUE);
-		asciiTerminal.write(14, 9, (char)218, color);
-		asciiTerminal.write(19, 9, (char)191, color);
-		asciiTerminal.write(14, 12, (char)192, color);
-		asciiTerminal.write(19, 12, (char)217, color);
-		for(int i = 0; i < 4; i++) {
-			asciiTerminal.write(15+i, 9, (char)196, color);
-			asciiTerminal.write(15+i, 12, (char)196, color);
-		}
-		for(int j = 0; j < 2; j++) {
-			asciiTerminal.write(14, 10+j, (char)179, color);
-			asciiTerminal.write(19, 10+j, (char)179, color);
+			// NEXT TETROMINO BORDER
+			asciiTerminal.writeString(15, 8, "NEXT", Color.BLUE);
+			asciiTerminal.write(14, 9, (char)218, color);
+			asciiTerminal.write(19, 9, (char)191, color);
+			asciiTerminal.write(14, 12, (char)192, color);
+			asciiTerminal.write(19, 12, (char)217, color);
+			for(int i = 0; i < 4; i++) {
+				asciiTerminal.write(15+i, 9, (char)196, color);
+				asciiTerminal.write(15+i, 12, (char)196, color);
+			}
+			for(int j = 0; j < 2; j++) {
+				asciiTerminal.write(14, 10+j, (char)179, color);
+				asciiTerminal.write(19, 10+j, (char)179, color);
+			}
 		}
 
 		if(gameState == GameState.MENU) {
@@ -289,6 +298,9 @@ public class AsciiTetris extends Game {
 		}
 		else if(gameState == GameState.LEADERBOARDS) {
 			leaderboardsGame();
+		}
+		else if(gameState == GameState.SETTINGS) {
+			settingGame();
 		}
 		else if(gameState == GameState.START) {
 			startGame();
@@ -325,6 +337,12 @@ public class AsciiTetris extends Game {
 						break;
 
 					case 2:
+						menuPosition = 0;
+						initSettings = true;
+						gameState = GameState.SETTINGS;
+						break;
+
+					case 3:
 						Gdx.app.exit();
 						break;
 
@@ -336,7 +354,7 @@ public class AsciiTetris extends Game {
 			else if(event == Input.Keys.UP) {
 				menuPosition--;
 				if(menuPosition < 0) {
-					menuPosition = 2;
+					menuPosition = 3;
 				}
 			}
 			else if(event == Input.Keys.DOWN) {
@@ -349,14 +367,14 @@ public class AsciiTetris extends Game {
 
 			event = 0;
 		}
-		menuPosition %= 3;
-
+		menuPosition %= 4;
 
 		asciiTerminal.writeString(5, 7, "MENU", Color.WHITE);
 
 		asciiTerminal.writeString(5, 9, "START", Color.GRAY);
 		asciiTerminal.writeString(1, 10, "LEADERBOARDS", Color.GRAY);
-		asciiTerminal.writeString(5, 11, "EXIT", Color.GRAY);
+		asciiTerminal.writeString(3, 11, "SETTINGS", Color.GRAY);
+		asciiTerminal.writeString(5, 12, "EXIT", Color.GRAY);
 		switch (menuPosition) {
 			case 0:
 				asciiTerminal.writeString(5, 9, "START", Color.WHITE);
@@ -367,7 +385,11 @@ public class AsciiTetris extends Game {
 				break;
 
 			case 2:
-				asciiTerminal.writeString(5, 11, "EXIT", Color.WHITE);
+				asciiTerminal.writeString(3, 11, "SETTINGS", Color.WHITE);
+				break;
+
+			case 3:
+				asciiTerminal.writeString(5, 12, "EXIT", Color.WHITE);
 				break;
 
 			default:
@@ -410,6 +432,128 @@ public class AsciiTetris extends Game {
 		newTetrimino();
 
 		gameState = GameState.PLAY;
+	}
+
+	private void settingGame() {
+		if(initSettings) {
+			initSettings = false;
+			nextPositionHelper = currentPositionHelper;
+			nextTileset = currentTileset;
+			nextScale = curentScale;
+		}
+
+		if(event != 0) {
+			if(event == Input.Keys.ENTER) {
+				if(menuPosition == 3) {
+					menuPosition = 0;
+
+					currentPositionHelper = nextPositionHelper;
+					currentTileset = nextTileset;
+					curentScale = nextScale;
+
+					asciiTerminal.changeSettings(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, curentScale.value);
+
+					gameState = GameState.MENU;
+				}
+				else if(menuPosition == 4) {
+					menuPosition = 0;
+					gameState = GameState.MENU;
+				}
+			}
+			if(event == Input.Keys.ESCAPE) {
+				menuPosition = 0;
+				gameState = GameState.MENU;
+			}
+			else if(event == Input.Keys.LEFT) {
+				if(menuPosition == 0) {
+					nextPositionHelper = !nextPositionHelper;
+				}
+				else if(menuPosition == 1) {
+					int nextPosition = Arrays.asList(Tileset.values()).indexOf(nextTileset)-1;
+					if(nextPosition < 0) {
+						nextPosition = Tileset.values().length - 1;
+					}
+					nextTileset = Tileset.values()[nextPosition];
+				}
+				else if(menuPosition == 2) {
+					int nextPosition = Arrays.asList(Scale.values()).indexOf(nextScale)-1;
+					if(nextPosition < 0) {
+						nextPosition = Scale.values().length - 1;
+					}
+					nextScale = Scale.values()[nextPosition];
+				}
+			}
+			else if(event == Input.Keys.RIGHT) {
+				if(menuPosition == 0) {
+					nextPositionHelper = !nextPositionHelper;
+				}
+				else if(menuPosition == 1) {
+					int nextPosition = Arrays.asList(Tileset.values()).indexOf(nextTileset)+1;
+					nextPosition %= Tileset.values().length;
+					nextTileset = Tileset.values()[nextPosition];
+				}
+				else if(menuPosition == 2) {
+					int nextPosition = Arrays.asList(Scale.values()).indexOf(nextScale)+1;
+					nextPosition %= Scale.values().length;
+					nextScale = Scale.values()[nextPosition];
+				}
+			}
+			else if(event == Input.Keys.UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 4;
+				}
+			}
+			else if(event == Input.Keys.DOWN) {
+				menuPosition++;
+			}
+
+			event = 0;
+		}
+
+		menuPosition %= 5;
+
+		asciiTerminal.writeString(6, 5, "SETTINGS", Color.YELLOW);
+
+		asciiTerminal.writeString(0, 7, "POSITION HELPER", Color.LIGHT_GRAY);
+		asciiTerminal.writeString(16, 7, nextPositionHelper ? "ON" : "OFF", Color.GRAY);
+
+		asciiTerminal.writeString(0, 9, "TILESET", Color.LIGHT_GRAY);
+		asciiTerminal.writeString(8, 9, nextTileset.name, Color.GRAY);
+
+		asciiTerminal.writeString(0, 11, "SCALE", Color.LIGHT_GRAY);
+		asciiTerminal.writeString(6, 11, nextScale.name, Color.GRAY);
+
+		asciiTerminal.writeString(8, 13, "SAVE", Color.GRAY);
+		asciiTerminal.writeString(7, 14, "CANCEL", Color.GRAY);
+		switch (menuPosition) {
+			case 0:
+				asciiTerminal.writeString(0, 7, "POSITION HELPER", Color.LIGHT_GRAY);
+				asciiTerminal.writeString(16, 7, nextPositionHelper ? "ON" : "OFF", Color.WHITE);
+				break;
+
+			case 1:
+				asciiTerminal.writeString(0, 9, "TILESET", Color.LIGHT_GRAY);
+				asciiTerminal.writeString(8, 9, nextTileset.name, Color.WHITE);
+				break;
+
+			case 2:
+				asciiTerminal.writeString(0, 11, "SCALE", Color.LIGHT_GRAY);
+				asciiTerminal.writeString(6, 11, nextScale.name, Color.WHITE);
+				break;
+
+			case 3:
+				asciiTerminal.writeString(8, 13, "SAVE", Color.WHITE);
+				break;
+
+			case 4:
+				asciiTerminal.writeString(7, 14, "CANCEL", Color.WHITE);
+				break;
+
+			default:
+				break;
+		}
+		asciiTerminal.writeString(0, WINDOW_HEIGHT-1, "LEFT OR RIGHT:CHANGE", Color.GREEN);
 	}
 
 	private void playGame(double delta) {
@@ -606,27 +750,24 @@ public class AsciiTetris extends Game {
 		// Find the shadow tetrimino position
 		boolean isShadowPosition = false;
 		GridPoint2 shadowPosition = new GridPoint2(currentPosition);
-		do {
-			for(GridPoint2 p : currentTetrimino.position[currentDirection]) {
-				if(p.y + shadowPosition.y + 1 >= PLAYFIELD_HEIGHT) {
-					isShadowPosition = true;
-					break;
+		if(currentPositionHelper) {
+			do {
+				for(GridPoint2 p : currentTetrimino.position[currentDirection]) {
+					if(p.y + shadowPosition.y + 1 >= PLAYFIELD_HEIGHT) {
+						isShadowPosition = true;
+						break;
+					}
+					Color color = cells[p.x + shadowPosition.x][p.y + shadowPosition.y + 1];
+					if(color != null) {
+						isShadowPosition = true;
+						break;
+					}
 				}
-				Color color = cells[p.x + shadowPosition.x][p.y + shadowPosition.y + 1];
-				if(color != null) {
-					isShadowPosition = true;
-					break;
+				if(!isShadowPosition) {
+					shadowPosition = new GridPoint2(shadowPosition.x, shadowPosition.y+1);
 				}
-			}
-			if(!isShadowPosition) {
-				shadowPosition = new GridPoint2(shadowPosition.x, shadowPosition.y+1);
-			}
-		}while(!isShadowPosition);
-
-
-
-
-
+			}while(!isShadowPosition);
+		}
 
 
 
@@ -647,10 +788,12 @@ public class AsciiTetris extends Game {
 		}
 
 		// SHADOW TETRIMINO
-		Color shadowColor = new Color(currentTetrimino.color.r/2, currentTetrimino.color.g/2, currentTetrimino.color.b/2, 1.0f);
-		for(GridPoint2 p : currentTetrimino.position[currentDirection]) {
-			if(p.y + currentPosition.y + yOffset - 2 > 1) {
-				asciiTerminal.write(p.x+shadowPosition.x+xOffset, p.y+shadowPosition.y+yOffset - 2, BLOC_TILE, Color.WHITE, shadowColor);
+		if(currentPositionHelper) {
+			Color shadowColor = new Color(currentTetrimino.color.r/2, currentTetrimino.color.g/2, currentTetrimino.color.b/2, 1.0f);
+			for(GridPoint2 p : currentTetrimino.position[currentDirection]) {
+				if(p.y + currentPosition.y + yOffset - 2 > 1) {
+					asciiTerminal.write(p.x+shadowPosition.x+xOffset, p.y+shadowPosition.y+yOffset - 2, BLOC_TILE, Color.WHITE, shadowColor);
+				}
 			}
 		}
 

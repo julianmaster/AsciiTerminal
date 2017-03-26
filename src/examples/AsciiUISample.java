@@ -83,16 +83,6 @@ public class AsciiUISample extends Game {
     @Override
     public void render() {
         super.render();
-
-        if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-            asciiTerminal.changeSettings("AsciiTetris", WINDOW_WIDTH, WINDOW_HEIGHT, "Curses_square_24x24.png", 24, 24, 1);
-
-            for(int i = 0; i < 16; i++) {
-                for(int j = 0; j < 10; j++) {
-                    asciiTerminal.write(i, j, (char)rand.nextInt(256), new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 1f));
-                }
-            }
-        }
     }
 
     @Override
