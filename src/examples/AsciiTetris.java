@@ -134,6 +134,8 @@ public class AsciiTetris extends Game {
 		START,
 		PLAY,
 		PAUSE,
+		CONFIRM_ABANDON,
+		CONFIRM_EXIT,
 		GAME_OVER
 	}
 
@@ -310,6 +312,12 @@ public class AsciiTetris extends Game {
 		}
 		else if(gameState == GameState.PAUSE) {
 			pauseGame();
+		}
+		else if(gameState == GameState.CONFIRM_ABANDON) {
+			confirmAbandonGame();
+		}
+		else if(gameState == GameState.CONFIRM_EXIT) {
+			confirmExitGame();
 		}
 		else if(gameState == GameState.GAME_OVER) {
 			gameOverGame();
@@ -820,11 +828,13 @@ public class AsciiTetris extends Game {
 						break;
 
 					case 1:
-						gameState = GameState.MENU;
+						menuPosition = 0;
+						gameState = GameState.CONFIRM_ABANDON;
 						break;
 
 					case 2:
-						Gdx.app.exit();
+						menuPosition = 0;
+						gameState = GameState.CONFIRM_EXIT;
 						break;
 
 					default:
@@ -863,6 +873,110 @@ public class AsciiTetris extends Game {
 
 			case 2:
 				asciiTerminal.writeString(5, 11, "EXIT", Color.WHITE);
+				break;
+
+			default:
+				break;
+		}
+		asciiTerminal.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
+	}
+
+	private void confirmAbandonGame() {
+		if(event != 0) {
+			if(event == Input.Keys.ENTER) {
+				switch (menuPosition) {
+					case 0:
+						gameState = GameState.MENU;
+						break;
+
+					case 1:
+						gameState = GameState.PAUSE;
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			else if(event == Input.Keys.LEFT || event == Input.Keys.UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 1;
+				}
+			}
+			else if(event == Input.Keys.RIGHT || event == Input.Keys.DOWN) {
+				menuPosition++;
+			}
+
+			event = 0;
+		}
+
+		menuPosition %= 2;
+
+		asciiTerminal.writeString(1, 9, "ARE YOU SURE", Color.WHITE);
+		asciiTerminal.writeString(2, 10, "TO ABANDON?", Color.WHITE);
+		asciiTerminal.writeString(2, 12, "YES", Color.GRAY);
+		asciiTerminal.writeString(10, 12, "NO", Color.GRAY);
+
+		switch (menuPosition) {
+			case 0:
+				asciiTerminal.writeString(2, 12, "YES", Color.WHITE);
+				break;
+
+			case 1:
+				asciiTerminal.writeString(10, 12, "NO", Color.WHITE);
+				break;
+
+			default:
+				break;
+		}
+		asciiTerminal.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
+	}
+
+	private void confirmExitGame() {
+		if(event != 0) {
+			if(event == Input.Keys.ENTER) {
+				switch (menuPosition) {
+					case 0:
+						Gdx.app.exit();
+						break;
+
+					case 1:
+						gameState = GameState.PAUSE;
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			else if(event == Input.Keys.LEFT || event == Input.Keys.UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 1;
+				}
+			}
+			else if(event == Input.Keys.RIGHT || event == Input.Keys.DOWN) {
+				menuPosition++;
+			}
+
+			event = 0;
+		}
+
+		menuPosition %= 2;
+
+		asciiTerminal.writeString(1, 9, "ARE YOU SURE", Color.WHITE);
+		asciiTerminal.writeString(1, 10, "TO EXIT GAME?", Color.WHITE);
+		asciiTerminal.writeString(2, 12, "YES", Color.GRAY);
+		asciiTerminal.writeString(10, 12, "NO", Color.GRAY);
+
+		switch (menuPosition) {
+			case 0:
+				asciiTerminal.writeString(2, 12, "YES", Color.WHITE);
+				break;
+
+			case 1:
+				asciiTerminal.writeString(10, 12, "NO", Color.WHITE);
 				break;
 
 			default:
