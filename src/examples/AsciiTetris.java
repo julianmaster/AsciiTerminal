@@ -1,28 +1,16 @@
 package examples;
 
-import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
 import ui.AsciiTerminal;
 
-import javax.swing.*;
-import java.io.*;
 import java.util.*;
-
-class Leaderboards implements Serializable {
-	private static final long serialVersionUID = 2274204318785895973L;
-	public LinkedList<Integer> scores = new LinkedList<>();
-}
 
 public class AsciiTetris extends Game {
 	private static final String TITLE = "AsciiTetris";
 	private static final int WINDOW_WIDTH = 21;
 	private static final int WINDOW_HEIGHT = 24;
-
-	private static final String LEADERBOARD_SAVE_FILE = "saveAsciiTetris.bin";
 
 	private static final char BLOC_TILE = 0;
 	private static final int PLAYFIELD_WIDTH = 10;
@@ -36,17 +24,18 @@ public class AsciiTetris extends Game {
 
 	private AsciiTerminal asciiTerminal;
 	private boolean currentPositionHelper = true;
-	private Tileset currentTileset = Tileset.ANIKKI;
-	private Scale curentScale = Scale.MEDIUM;
+	private Tileset currentTileset;
+	private Scale currentScale;
 
 	private Random rand = new Random();
 
 	private boolean initSettings = false;
 	private boolean nextPositionHelper = true;
 	private Tileset nextTileset = currentTileset;
-	private Scale nextScale = curentScale;
+	private Scale nextScale = currentScale;
 
-	private Leaderboards leaderboards = new Leaderboards();
+	private Preferences prefs;
+	private LinkedList<Integer> scores = new LinkedList<>();
 	private GameState gameState = GameState.MENU;
 
 	private int score = 0;
@@ -173,13 +162,14 @@ public class AsciiTetris extends Game {
 
 	@Override
 	public void create() {
+		 prefs = Gdx.app.getPreferences(TITLE);
 		try {
-			loadLeaderboards();
+			loadPreferences();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		asciiTerminal = new AsciiTerminal(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, curentScale.value);
+		asciiTerminal = new AsciiTerminal(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, currentScale.value);
 
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			@Override
@@ -202,48 +192,52 @@ public class AsciiTetris extends Game {
 		super.setScreen(asciiTerminal);
 	}
 
-	private void loadLeaderboards() throws Exception {
-		File file = new File(LEADERBOARD_SAVE_FILE);
-		if(file.exists() && file.canRead()) {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
-			leaderboards = (Leaderboards)ois.readObject();
-			ois.close();
-		}
-		else if(file.exists() && !file.canWrite()) {
-			JOptionPane.showMessageDialog(null, "Unable to load save file. You don't have persmision to load it.", "AsciiTetris Message", JOptionPane.ERROR_MESSAGE);
-		}
-		else {
-			for(int i = 0; i < 5; i++) {
-				leaderboards.scores.add(0);
-				saveLeaderboards();
+	private void loadPreferences() throws Exception {
+		String tilesetName = prefs.getString("tileset", Tileset.ANIKKI.name);
+		for(Tileset tileset : Tileset.values()) {
+			if(tileset.name.equals(tilesetName)) {
+				currentTileset = tileset;
 			}
 		}
+		if(currentTileset == null) {
+			currentTileset = Tileset.ANIKKI;
+		}
+
+		String scaleName = prefs.getString("scale", Scale.MEDIUM.name);
+		for(Scale scale : Scale.values()) {
+			if(scale.name.equals(scaleName)) {
+				currentScale = scale;
+			}
+		}
+		if(currentScale == null) {
+			currentScale = Scale.MEDIUM;
+		}
+
+		currentPositionHelper = prefs.getBoolean("positionHelper", true);
+
+		scores.add(prefs.getInteger("Score1", 0));
+		scores.add(prefs.getInteger("Score2", 0));
+		scores.add(prefs.getInteger("Score3", 0));
+		scores.add(prefs.getInteger("Score4", 0));
+		scores.add(prefs.getInteger("Score5", 0));
+
+		prefs.putString("tileset", currentTileset.name);
+		prefs.putString("scale", currentScale.name);
+		prefs.putBoolean("positionHelper", currentPositionHelper);
+		for(int i = 0; i < 5; i++) {
+			prefs.putInteger("Score"+(i+1), scores.get(i));
+		}
+		prefs.flush();
 	}
 
-	private void saveLeaderboards() {
-		File file = new File(LEADERBOARD_SAVE_FILE);
-		if(file.exists() && file.canWrite() || !file.exists()) {
-			ObjectOutputStream out = null;
-			try {
-				out = new ObjectOutputStream(new FileOutputStream(file));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if(out != null) {
-				try {
-					out.writeObject(leaderboards);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				finally {
-					try {
-						out.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
+	private void savePreferences() {
+		prefs.putString("tileset", currentTileset.name);
+		prefs.putString("scale", currentScale.name);
+		prefs.putBoolean("positionHelper", currentPositionHelper);
+		for(int i = 0; i < 5; i++) {
+			prefs.putInteger("Score"+(i+1), scores.get(i));
 		}
+		prefs.flush();
 	}
 
 	@Override
@@ -410,7 +404,7 @@ public class AsciiTetris extends Game {
 		asciiTerminal.writeString(1, 6, "LEADERBOARDS", Color.WHITE);
 		for(int i = 0; i < 5; i++) {
 			asciiTerminal.writeString(2, 8+i, (i+1)+".", Color.WHITE);
-			String value = leaderboards.scores.get(i).toString();
+			String value = scores.get(i).toString();
 			asciiTerminal.writeString(12-value.length(), 8+i, value, Color.WHITE);
 		}
 		asciiTerminal.writeString(1, WINDOW_HEIGHT-1, "ESC:MENU", Color.GREEN);
@@ -439,7 +433,7 @@ public class AsciiTetris extends Game {
 			initSettings = false;
 			nextPositionHelper = currentPositionHelper;
 			nextTileset = currentTileset;
-			nextScale = curentScale;
+			nextScale = currentScale;
 		}
 
 		if(event != 0) {
@@ -449,9 +443,11 @@ public class AsciiTetris extends Game {
 
 					currentPositionHelper = nextPositionHelper;
 					currentTileset = nextTileset;
-					curentScale = nextScale;
+					currentScale = nextScale;
 
-					asciiTerminal.changeSettings(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, curentScale.value);
+					savePreferences();
+
+					asciiTerminal.changeSettings(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, currentScale.value);
 
 					gameState = GameState.MENU;
 				}
@@ -733,11 +729,11 @@ public class AsciiTetris extends Game {
 						if(cells[x][y] != null) {
 							gameState = GameState.GAME_OVER;
 
-							leaderboards.scores.add(score);
-							leaderboards.scores.sort(Collections.reverseOrder());
-							leaderboards.scores = new LinkedList<>(leaderboards.scores.subList(0, 5));
+							scores.add(score);
+							scores.sort(Collections.reverseOrder());
+							scores = new LinkedList<>(scores.subList(0, 5));
 
-							saveLeaderboards();
+							savePreferences();
 							return;
 						}
 					}
