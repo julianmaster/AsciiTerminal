@@ -36,6 +36,7 @@ public class AsciiTetris extends Game {
 
 	private Preferences prefs;
 	private LinkedList<Integer> scores = new LinkedList<>();
+	private GameState previousGameState = null;
 	private GameState gameState = GameState.MENU;
 
 	private int score = 0;
@@ -123,6 +124,8 @@ public class AsciiTetris extends Game {
 		START,
 		PLAY,
 		PAUSE,
+		CONFIRM_ABANDON,
+		CONFIRM_EXIT,
 		GAME_OVER
 	}
 
@@ -305,6 +308,12 @@ public class AsciiTetris extends Game {
 		else if(gameState == GameState.PAUSE) {
 			pauseGame();
 		}
+		else if(gameState == GameState.CONFIRM_ABANDON) {
+			confirmAbandonGame();
+		}
+		else if(gameState == GameState.CONFIRM_EXIT) {
+			confirmExitGame();
+		}
 		else if(gameState == GameState.GAME_OVER) {
 			gameOverGame();
 		}
@@ -323,17 +332,17 @@ public class AsciiTetris extends Game {
 			if(event == Input.Keys.ENTER) {
 				switch (menuPosition) {
 					case 0:
-						gameState = GameState.START;
+						changeGameState(GameState.START);
 						break;
 
 					case 1:
-						gameState = GameState.LEADERBOARDS;
+						changeGameState(GameState.LEADERBOARDS);
 						break;
 
 					case 2:
 						menuPosition = 0;
 						initSettings = true;
-						gameState = GameState.SETTINGS;
+						changeGameState(GameState.SETTINGS);
 						break;
 
 					case 3:
@@ -395,7 +404,7 @@ public class AsciiTetris extends Game {
 	private void leaderboardsGame() {
 		if(event != 0) {
 			if(event == Input.Keys.ESCAPE) {
-				gameState = GameState.MENU;
+				changeGameState(GameState.MENU);
 			}
 
 			event = 0;
@@ -425,7 +434,7 @@ public class AsciiTetris extends Game {
 
 		newTetrimino();
 
-		gameState = GameState.PLAY;
+		changeGameState(GameState.PLAY);
 	}
 
 	private void settingGame() {
@@ -449,16 +458,16 @@ public class AsciiTetris extends Game {
 
 					asciiTerminal.changeSettings(TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, currentTileset.file, currentTileset.characterWidth, currentTileset.characterHeight, currentScale.value);
 
-					gameState = GameState.MENU;
+					changeGameState(previousGameState);
 				}
 				else if(menuPosition == 4) {
 					menuPosition = 0;
-					gameState = GameState.MENU;
+					changeGameState(previousGameState);
 				}
 			}
 			if(event == Input.Keys.ESCAPE) {
 				menuPosition = 0;
-				gameState = GameState.MENU;
+				changeGameState(previousGameState);
 			}
 			else if(event == Input.Keys.LEFT) {
 				if(menuPosition == 0) {
@@ -582,7 +591,7 @@ public class AsciiTetris extends Game {
 				}
 			}
 			else if(event == Input.Keys.ESCAPE) {
-				gameState = GameState.PAUSE;
+				changeGameState(GameState.PAUSE);
 				return;
 			}
 
@@ -727,7 +736,7 @@ public class AsciiTetris extends Game {
 				for(int x = 0; x < PLAYFIELD_WIDTH; x++) {
 					for(y = 0; y < PLAYFIELD_HEIGHT-DISPLAY_PLAYFIELD_HEIGHT; y++) {
 						if(cells[x][y] != null) {
-							gameState = GameState.GAME_OVER;
+							changeGameState(GameState.GAME_OVER);
 
 							scores.add(score);
 							scores.sort(Collections.reverseOrder());
@@ -812,15 +821,23 @@ public class AsciiTetris extends Game {
 			if(event == Input.Keys.ENTER) {
 				switch (menuPosition) {
 					case 0:
-						gameState = GameState.PLAY;
+						changeGameState(GameState.PLAY);
 						break;
 
 					case 1:
-						gameState = GameState.MENU;
+						menuPosition = 0;
+						initSettings = true;
+						changeGameState(GameState.SETTINGS);
 						break;
 
 					case 2:
-						Gdx.app.exit();
+						menuPosition = 0;
+						changeGameState(GameState.CONFIRM_ABANDON);
+						break;
+
+					case 3:
+						menuPosition = 0;
+						changeGameState(GameState.CONFIRM_EXIT);
 						break;
 
 					default:
@@ -831,7 +848,7 @@ public class AsciiTetris extends Game {
 			else if(event == Input.Keys.UP) {
 				menuPosition--;
 				if(menuPosition < 0) {
-					menuPosition = 2;
+					menuPosition = 3;
 				}
 			}
 			else if(event == Input.Keys.DOWN) {
@@ -841,24 +858,133 @@ public class AsciiTetris extends Game {
 			event = 0;
 		}
 
-		menuPosition %= 3;
+		menuPosition %= 4;
 
 		asciiTerminal.writeString(4, 7, "PAUSE", Color.WHITE);
 
 		asciiTerminal.writeString(3, 9, "CONTINUE", Color.GRAY);
-		asciiTerminal.writeString(5, 10, "MENU", Color.GRAY);
-		asciiTerminal.writeString(5, 11, "EXIT", Color.GRAY);
+		asciiTerminal.writeString(3, 10, "SETTINGS", Color.GRAY);
+		asciiTerminal.writeString(5, 11, "MENU", Color.GRAY);
+		asciiTerminal.writeString(5, 12, "EXIT", Color.GRAY);
 		switch (menuPosition) {
 			case 0:
 				asciiTerminal.writeString(3, 9, "CONTINUE", Color.WHITE);
 				break;
 
 			case 1:
-				asciiTerminal.writeString(5, 10, "MENU", Color.WHITE);
+				asciiTerminal.writeString(3, 10, "SETTINGS", Color.WHITE);
 				break;
 
 			case 2:
-				asciiTerminal.writeString(5, 11, "EXIT", Color.WHITE);
+				asciiTerminal.writeString(5, 11, "MENU", Color.WHITE);
+				break;
+
+			case 3:
+				asciiTerminal.writeString(5, 12, "EXIT", Color.WHITE);
+				break;
+
+			default:
+				break;
+		}
+		asciiTerminal.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
+	}
+
+	private void confirmAbandonGame() {
+		if(event != 0) {
+			if(event == Input.Keys.ENTER) {
+				switch (menuPosition) {
+					case 0:
+						changeGameState(GameState.MENU);
+						break;
+
+					case 1:
+						changeGameState(GameState.PAUSE);
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			else if(event == Input.Keys.LEFT || event == Input.Keys.UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 1;
+				}
+			}
+			else if(event == Input.Keys.RIGHT || event == Input.Keys.DOWN) {
+				menuPosition++;
+			}
+
+			event = 0;
+		}
+
+		menuPosition %= 2;
+
+		asciiTerminal.writeString(1, 9, "ARE YOU SURE", Color.WHITE);
+		asciiTerminal.writeString(2, 10, "TO ABANDON?", Color.WHITE);
+		asciiTerminal.writeString(2, 12, "YES", Color.GRAY);
+		asciiTerminal.writeString(10, 12, "NO", Color.GRAY);
+
+		switch (menuPosition) {
+			case 0:
+				asciiTerminal.writeString(2, 12, "YES", Color.WHITE);
+				break;
+
+			case 1:
+				asciiTerminal.writeString(10, 12, "NO", Color.WHITE);
+				break;
+
+			default:
+				break;
+		}
+		asciiTerminal.writeString(1, WINDOW_HEIGHT-1, "ENTER:SELECT", Color.GREEN);
+	}
+
+	private void confirmExitGame() {
+		if(event != 0) {
+			if(event == Input.Keys.ENTER) {
+				switch (menuPosition) {
+					case 0:
+						Gdx.app.exit();
+						break;
+
+					case 1:
+						changeGameState(GameState.PAUSE);
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			else if(event == Input.Keys.LEFT || event == Input.Keys.UP) {
+				menuPosition--;
+				if(menuPosition < 0) {
+					menuPosition = 1;
+				}
+			}
+			else if(event == Input.Keys.RIGHT || event == Input.Keys.DOWN) {
+				menuPosition++;
+			}
+
+			event = 0;
+		}
+
+		menuPosition %= 2;
+
+		asciiTerminal.writeString(1, 9, "ARE YOU SURE", Color.WHITE);
+		asciiTerminal.writeString(1, 10, "TO EXIT GAME?", Color.WHITE);
+		asciiTerminal.writeString(2, 12, "YES", Color.GRAY);
+		asciiTerminal.writeString(10, 12, "NO", Color.GRAY);
+
+		switch (menuPosition) {
+			case 0:
+				asciiTerminal.writeString(2, 12, "YES", Color.WHITE);
+				break;
+
+			case 1:
+				asciiTerminal.writeString(10, 12, "NO", Color.WHITE);
 				break;
 
 			default:
@@ -872,11 +998,11 @@ public class AsciiTetris extends Game {
 			if(event == Input.Keys.ENTER) {
 				switch (menuPosition) {
 					case 0:
-						gameState = GameState.START;
+						changeGameState(GameState.START);
 						break;
 
 					case 1:
-						gameState = GameState.MENU;
+						changeGameState(GameState.MENU);
 						break;
 
 					case 2:
@@ -1017,5 +1143,10 @@ public class AsciiTetris extends Game {
 		else {
 			return level;
 		}
+	}
+
+	private void changeGameState(GameState nextGameState) {
+		previousGameState = gameState;
+		gameState = nextGameState;
 	}
 }
