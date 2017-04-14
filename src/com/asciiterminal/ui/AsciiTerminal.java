@@ -51,8 +51,8 @@ public class AsciiTerminal extends ScreenAdapter {
         this.characterHeight = characterHeight;
         this.scale = scale;
 
-//        Gdx.graphics.setTitle(title);
-//        Gdx.graphics.setWindowedMode(width * characterWidth * scale, height * characterHeight * scale);
+        Gdx.graphics.setTitle(title);
+        Gdx.graphics.setWindowedMode(width * characterWidth * scale, height * characterHeight * scale);
 
         terminal = new AsciiTerminalDataCell[width][height];
         oldTerminal = new AsciiTerminalDataCell[width][height];
