@@ -1,9 +1,9 @@
-package examples;
+package com.asciiterminal.examples;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.GridPoint2;
-import ui.AsciiTerminal;
+import com.asciiterminal.ui.AsciiTerminal;
 
 import java.util.*;
 
@@ -268,11 +268,11 @@ public class AsciiTetris extends Game {
 
 			// SCORE
 			asciiTerminal.writeString(14, 2, "SCORE", Color.BLUE);
-			asciiTerminal.writeString(14, 3, String.format("%06d", score), Color.CYAN);
+			asciiTerminal.writeString(14, 3, format(score, 6), Color.CYAN);
 
 			// LEVEL
 			asciiTerminal.writeString(14, 5, "LEVEL", Color.BLUE);
-			asciiTerminal.writeString(14, 6, String.format("%06d", level), Color.CYAN);
+			asciiTerminal.writeString(14, 6, format(score, 6), Color.CYAN);
 
 			// NEXT TETROMINO BORDER
 			asciiTerminal.writeString(15, 8, "NEXT", Color.BLUE);
@@ -1032,7 +1032,7 @@ public class AsciiTetris extends Game {
 		asciiTerminal.writeString(3, 7, "GAME OVER", Color.WHITE);
 
 		asciiTerminal.writeString(4, 9, "SCORE", Color.GRAY);
-		asciiTerminal.writeString(4, 10, String.format("%06d", score), Color.CYAN);
+		asciiTerminal.writeString(4, 10, format(score, 6), Color.CYAN);
 
 		asciiTerminal.writeString(4, 12, "RETRY", Color.GRAY);
 		asciiTerminal.writeString(5, 13, "MENU", Color.GRAY);
@@ -1148,5 +1148,26 @@ public class AsciiTetris extends Game {
 	private void changeGameState(GameState nextGameState) {
 		previousGameState = gameState;
 		gameState = nextGameState;
+	}
+
+
+
+	public static String format(int value, int length) {
+		String msg = "";
+
+		int currentLength = String.valueOf(value).length();
+		if(currentLength < length) {
+			for (int i = currentLength; i < length; i++) {
+				msg += "0";
+			}
+			return msg + value;
+		}
+		else if(currentLength == length) {
+			return String.valueOf(value);
+		}
+		else {
+			String curentStr = String.valueOf(value);
+			return curentStr.substring(curentStr.length() - length, curentStr.length());
+		}
 	}
 }

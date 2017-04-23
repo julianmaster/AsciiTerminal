@@ -1,4 +1,4 @@
-package ui;
+package com.asciiterminal.ui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -84,8 +84,8 @@ public class AsciiTerminal extends ScreenAdapter {
         Pixmap pixmap = new Pixmap(Gdx.files.internal(tilesetFile));
         Pixmap resutPixmap = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Pixmap.Format.RGBA8888);
 
-        ByteBuffer buffer = pixmap.getPixels();
-        ByteBuffer resultBuffer = resutPixmap.getPixels();
+        ByteBuffer buffer = (ByteBuffer)pixmap.getPixels();
+        ByteBuffer resultBuffer = (ByteBuffer)resutPixmap.getPixels();
         buffer.rewind();
         resultBuffer.rewind();
 
@@ -180,8 +180,8 @@ public class AsciiTerminal extends ScreenAdapter {
         Pixmap pixmap = new Pixmap(Gdx.files.internal(tilesetFile));
         Pixmap resutPixmap = new Pixmap(pixmap.getWidth(), pixmap.getHeight(), Pixmap.Format.RGBA8888);
 
-        ByteBuffer buffer = pixmap.getPixels();
-        ByteBuffer resultBuffer = resutPixmap.getPixels();
+        ByteBuffer buffer = (ByteBuffer)pixmap.getPixels();
+        ByteBuffer resultBuffer = (ByteBuffer)resutPixmap.getPixels();
         buffer.rewind();
         resultBuffer.rewind();
 

@@ -1,4 +1,4 @@
-package ui;
+package com.asciiterminal.ui;
 
 import java.awt.Color;
 import java.awt.image.RGBImageFilter;
