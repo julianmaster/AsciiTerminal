@@ -86,6 +86,10 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 		return selected;
 	}
 
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+
 	public boolean isJustSelected() {
 		return justSelected;
 	}
