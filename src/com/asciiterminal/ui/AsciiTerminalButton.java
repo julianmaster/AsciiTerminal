@@ -122,4 +122,44 @@ public class AsciiTerminalButton extends Actor {
 	public ClickListener getClickListener() {
 		return clickListener;
 	}
+
+	public Color getMouseDefaultColor() {
+		return mouseDefaultColor;
+	}
+
+	public void setMouseDefaultColor(Color mouseDefaultColor) {
+		this.mouseDefaultColor = mouseDefaultColor;
+	}
+
+	public Color getMouseClickedColor() {
+		return mouseClickedColor;
+	}
+
+	public void setMouseClickedColor(Color mouseClickedColor) {
+		this.mouseClickedColor = mouseClickedColor;
+	}
+
+	public Color getMouseEnteredColor() {
+		return mouseEnteredColor;
+	}
+
+	public void setMouseEnteredColor(Color mouseEnteredColor) {
+		this.mouseEnteredColor = mouseEnteredColor;
+	}
+
+	public Color getMouseDisabledColor() {
+		return mouseDisabledColor;
+	}
+
+	public void setMouseDisabledColor(Color mouseDisabledColor) {
+		this.mouseDisabledColor = mouseDisabledColor;
+	}
+
+	public Color getMouseBackgroundColor() {
+		return mouseBackgroundColor;
+	}
+
+	public void setMouseBackgroundColor(Color mouseBackgroundColor) {
+		this.mouseBackgroundColor = mouseBackgroundColor;
+	}
 }
