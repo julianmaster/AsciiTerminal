@@ -314,9 +314,9 @@ public class AsciiTerminal extends ScreenAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
+        frameBuffer.begin();
         stage.draw();
 
-        frameBuffer.begin();
         batch.begin();
         for(int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -353,7 +353,7 @@ public class AsciiTerminal extends ScreenAdapter {
         camera.position.set(camera.viewportWidth/2,camera.viewportHeight/2,0);
     }
 
-    public void addActor(AsciiTerminalButton actor) {
+    public void addActor(Actor actor) {
         stage.addActor(actor);
     }
 
