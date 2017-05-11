@@ -407,6 +407,6 @@ public class AsciiTerminal extends ScreenAdapter {
     }
 
     public AsciiTerminalDataCell getCell(int x, int y) {
-    	return terminal[y][x];
+    	return terminal[x][y];
     }
 }
