@@ -17,23 +17,23 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 	private boolean justSelected = false;
 	private Color mouseSelectedColor;
 
-	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseSelectedColor) {
-		super(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor);
+	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String name, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseSelectedColor) {
+		super(asciiTerminal, name, x, y, mouseDefaultColor, mouseClickedColor);
 		this.mouseSelectedColor = mouseSelectedColor;
 	}
 
-	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
-		super(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, mouseBackgroundColor);
+	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String name, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
+		super(asciiTerminal, name, x, y, mouseDefaultColor, mouseClickedColor, mouseBackgroundColor);
 		this.mouseSelectedColor = mouseSelectedColor;
 	}
 
-	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
-		super(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseBackgroundColor);
+	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String name, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
+		super(asciiTerminal, name, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseBackgroundColor);
 		this.mouseSelectedColor = mouseSelectedColor;
 	}
 
-	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String label, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseDisabledColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
-		super(asciiTerminal, label, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseDisabledColor, mouseBackgroundColor);
+	public AsciiSelectableTerminalButton(AsciiTerminal asciiTerminal, String name, int x, int y, Color mouseDefaultColor, Color mouseClickedColor, Color mouseEnteredColor, Color mouseDisabledColor, Color mouseSelectedColor, Color mouseBackgroundColor) {
+		super(asciiTerminal, name, x, y, mouseDefaultColor, mouseClickedColor, mouseEnteredColor, mouseDisabledColor, mouseBackgroundColor);
 		this.mouseSelectedColor = mouseSelectedColor;
 	}
 
@@ -79,7 +79,7 @@ public class AsciiSelectableTerminalButton extends AsciiTerminalButton {
 			justSelected = false;
 		}
 
-		asciiTerminal.writeString(x, y, this.label, current, this.mouseBackgroundColor);
+		asciiTerminal.writeString(x, y, this.getName(), current, this.mouseBackgroundColor);
 	}
 
 	public boolean isSelected() {
