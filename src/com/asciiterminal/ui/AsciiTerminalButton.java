@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 /**
@@ -60,6 +61,8 @@ public class AsciiTerminalButton extends Actor {
 			public void clicked(InputEvent event, float x, float y) {
 				if(isDisabled()) return;
 			}
+
+
 		});
 	}
 
@@ -70,7 +73,7 @@ public class AsciiTerminalButton extends Actor {
 	@Override
 	protected void sizeChanged() {
 		this.setX(x * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
-		this.setY(y * asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
+		this.setY((asciiTerminal.getHeight() - y - 1) * asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
 		this.setWidth(this.getName().length() * asciiTerminal.getCharacterWidth() * asciiTerminal.getScale());
 		this.setHeight(asciiTerminal.getCharacterHeight() * asciiTerminal.getScale());
 	}

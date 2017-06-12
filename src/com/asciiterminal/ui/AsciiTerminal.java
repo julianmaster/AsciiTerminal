@@ -64,7 +64,6 @@ public class AsciiTerminal extends ScreenAdapter {
         }
 
         this.camera = new OrthographicCamera();
-        this.camera.setToOrtho(true);
         this.viewport = new FitViewport(width*characterWidth*scale, height*characterHeight*scale, camera);
         this.viewport.apply();
         this.batch = new SpriteBatch();
@@ -314,9 +313,14 @@ public class AsciiTerminal extends ScreenAdapter {
         camera.update();
         batch.setProjectionMatrix(camera.combined);
 
-        frameBuffer.begin();
-        stage.draw();
+        // Draw AsciiTerminal actors
+        for(Actor actor : stage.getActors()) {
+            if(actor instanceof AsciiTerminalButton) {
+                actor.draw(batch, 1);
+            }
+        }
 
+        frameBuffer.begin();
         batch.begin();
         for(int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -345,6 +349,9 @@ public class AsciiTerminal extends ScreenAdapter {
         viewport.apply();
         batch.draw(frameRegion, 0, 0);
         batch.end();
+
+        // Draw other actors
+        stage.draw();
     }
 
     @Override
@@ -380,6 +387,14 @@ public class AsciiTerminal extends ScreenAdapter {
 
     public void setDefaultCharacterBackgroundColor(Color defaultCharacterBackgroundColor) {
         this.defaultCharacterBackgroundColor = defaultCharacterBackgroundColor;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public int getFullWidth() {
