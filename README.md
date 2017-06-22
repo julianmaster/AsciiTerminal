@@ -3,7 +3,7 @@
 AsciiTerminal is a ASCII terminal java display using [libGDX](http://libgdx.badlogicgames.com/). It supports 256 characters tilesets, foreground colors, bacground colors.
 You can set the size of the terminal.
 
-The library give 2 simple buttons : [base button](https://github.com/julianmaster/AsciiTerminal/blob/master/src/ui/AsciiTerminalButton.java) and [selectable button](https://github.com/julianmaster/AsciiTerminal/blob/master/src/ui/AsciiSelectableTerminalButton.java); 
+The library give 2 simple buttons : [basic button](https://github.com/julianmaster/AsciiTerminal/blob/master/src/com/asciiterminal/ui/AsciiTerminalButton.java) and [selectable button](https://github.com/julianmaster/AsciiTerminal/blob/master/src/com/asciiterminal/ui/AsciiSelectableTerminalButton.java)
 
 AsciiTerminal is a extend version of the [Trystan's AsciiPanel](https://github.com/trystan/AsciiPanel).
 
