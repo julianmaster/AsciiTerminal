@@ -9,9 +9,9 @@ AsciiTerminal is a extend version of the [Trystan's AsciiPanel](https://github.c
 
 ## Examples
 
-> Examples of use is in the [examples](https://github.com/julianmaster/AsciiTerminal/tree/master/src/examples) folder.
+> Examples of use is in the [examples](https://github.com/julianmaster/AsciiTerminal/tree/master/src/com/asciiterminal/examples) folder.
 
-### AsciiTetris
+### [AsciiTetris](https://github.com/julianmaster/AsciiTerminal/blob/master/src/com/asciiterminal/examples/AsciiTetris.java)
 
 > ![AsciiTetris Menu](https://raw.github.com/julianmaster/AsciiTerminal/master/readme-media/AsciiTetris-1.png)
 > ![AsciiTetris Game](https://raw.github.com/julianmaster/AsciiTerminal/master/readme-media/AsciiTetris-2.png)
@@ -27,7 +27,7 @@ AsciiTerminal is a extend version of the [Trystan's AsciiPanel](https://github.c
 
 > **Comming soon**
 
-### AsciiUISample
+### [AsciiUISample](https://github.com/julianmaster/AsciiTerminal/blob/master/src/com/asciiterminal/examples/AsciiUISample.java)
 
 > #### Aniki [8x8]
 > ![example image Aniki tileset](https://raw.github.com/julianmaster/AsciiTerminal/master/readme-media/screenshot-1.png)
