@@ -23,7 +23,6 @@
         <url>https://github.com/julianmaster/AsciiTerminal</url>
         <connection>scm:git:git://github.com/julianmaster/AsciiTerminal.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:julianmaster/AsciiTerminal.git</developerConnection>
-      <tag>1.0</tag>
   </scm>
 
     <distributionManagement>
@@ -67,19 +66,16 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>src</sourceDirectory>
+
         <resources>
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
                     <include>README*</include>
-                    <include>LICENCE*</include>
+                    <include>NOTICE*</include>
+                    <include>LICENSE*</include>
                 </includes>
-                <excludes>
-                    <exclude>**/assets/**</exclude>
-                    <exclude>**/readme-media/**</exclude>
-                    <exclude>**/target/**</exclude>
-                    <exclude>**/examples/**</exclude>
-                </excludes>
             </resource>
         </resources>
 
@@ -94,6 +90,9 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
+                    <excludes>
+                        <exclude>**/examples/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
@@ -111,6 +110,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>**/examples/**</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
 
             <!-- javadoc JAR -->
@@ -127,6 +131,9 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludePackageNames>com.asciiterminal.examples</excludePackageNames>
+                </configuration>
             </plugin>
 
             <!-- Release configuration: -->
