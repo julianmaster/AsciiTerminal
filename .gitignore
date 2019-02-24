@@ -69,3 +69,4 @@ bin
 build
 *.bin
 *.gradle
+release.properties
