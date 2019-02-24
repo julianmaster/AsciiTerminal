@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.julianmaster</groupId>
+    <artifactId>asciiterminal</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>AsciiTerminal</name>
+    <description>A Java ASCII terminal display usable with any Dwarf Fortress tileset</description>
+    <url>https://github.com/julianmaster/AsciiTerminal</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://github.com/julianmaster/AsciiTerminal/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/julianmaster/AsciiTerminal</url>
+        <connection>scm:git:git://github.com/julianmaster/AsciiTerminal.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:julianmaster/AsciiTerminal.git</developerConnection>
+      <tag>1.0</tag>
+  </scm>
+
+    <distributionManagement>
+        <!-- You'll probably want to test this out with a local copy of Nexus OSS. -->
+        <!-- Remove these entries and uncomment the Sonatype Nexus repositories
+            below when you actually want to release. -->
+        <snapshotRepository>
+            <id>localhost-nexus-snapshots</id>
+            <name>Local Nexus snapshot repository</name>
+            <url>http://localhost:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>localhost-nexus-staging</id>
+            <name>Local Nexus release repository</name>
+            <url>http://localhost:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <!-- 		<snapshotRepository> -->
+        <!-- 			<id>sonatype-nexus-snapshots</id> -->
+        <!-- 			<name>Sonatype Nexus snapshot repository</name> -->
+        <!-- 			<url>https://oss.sonatype.org/content/repositories/snapshots</url> -->
+        <!-- 		</snapshotRepository> -->
+        <!-- 		<repository> -->
+        <!-- 			<id>sonatype-nexus-staging</id> -->
+        <!-- 			<name>Sonatype Nexus release repository</name> -->
+        <!-- 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url> -->
+        <!-- 		</repository> -->
+    </distributionManagement>
+
+    <properties>
+        <!-- Optional, but sensible -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>1.9.9</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}</directory>
+                <includes>
+                    <include>README*</include>
+                    <include>LICENCE*</include>
+                </includes>
+                <excludes>
+                    <exclude>**/assets/**</exclude>
+                    <exclude>**/readme-media/**</exclude>
+                    <exclude>**/target/**</exclude>
+                    <exclude>**/examples/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
+
+        <plugins>
+
+            <!-- JVM 1.8 compliance and UTF-8 encoding: -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <!-- source JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- javadoc JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Release configuration: -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+
+                <configuration>
+                    <!-- Automated passphrase entry: -->
+
+                    <!-- To pass your passphrase to the build automatically, so avoiding
+                        manual interaction, you'll need to put the passphrase into settings.xml.
+                        You don't really want that to be in plain text, so you'll want to follow:
+                        http://maven.apache.org/guides/mini/guide-encryption.html -->
+                    <!-- <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments> -->
+
+                    <!-- Manual passphrase entry: -->
+
+                    <!-- This is the simplest secure solution, but requires you to type
+                        your key passphrase in manually when performing a release. No biggie unless
+                        you want your CI server to decide when to release for you. -->
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+
+                    <checkModificationExcludes>
+                        <checkModificationExclude>pom.xml</checkModificationExclude>
+                    </checkModificationExcludes>
+                </configuration>
+            </plugin>
+
+            <!-- Deployment -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>sonatype-nexus-staging</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+
+        <!-- GPG Signature on release -->
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/julianmaster/AsciiTerminal/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>Julianmaster</id>
+            <name>Julien Maitre</name>
+            <email>julienm86230@hotmail.fr</email>
+            <organization>com.github.julianmaster</organization>
+            <organizationUrl>https://github.com/julianmaster</organizationUrl>
+            <url>https://github.com/julianmaster</url>
+        </developer>
+    </developers>
+</project>
