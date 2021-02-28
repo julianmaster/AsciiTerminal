@@ -67,6 +67,7 @@ $RECYCLE.BIN/
 .settings
 bin
 build
+target
 *.bin
 *.gradle
 release.properties
